@@ -1,8 +1,8 @@
 import os
 from setuptools import setup
-
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 setup(
     name = "p_framework",
@@ -15,6 +15,10 @@ setup(
     url = "http://packages.python.org/an_example_pypi_project",
     packages=['p_framework'],
     long_description=read('README.rst'),
+    install_requires = ["werkzeug", "jinja2"],
+    tests_require = ["pytest", "pytest-cov"],
+    test_suite = "test",
+    test_loader = "runtests:PyTest",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
