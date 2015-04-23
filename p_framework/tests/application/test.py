@@ -21,26 +21,31 @@ class CustomApplication(Application):
         for k, v in config.iteritems():
             setattr(self, k, v)
 
+
 def config_application():
     articles_url = ArticleRouter("/home/")
     test_app = Application(articles_url)
     c = Client(test_app, Response)
     return c
 
+
 def test_application_get():
     c = config_application()
     resp = c.get('/home/')
     assert resp.status_code == 200
+
 
 def test_application_get_not_found():
     c = config_application()
     resp = c.get('/article/')
     assert resp.status_code == 404
 
+
 def test_application_method_not_allowed():
     c = config_application()
     resp = c.post('/home/')
     assert resp.status_code == 405
+
 
 def test_conf_app():
     articles_url = ArticleRouter("/home/")

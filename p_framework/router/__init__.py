@@ -3,6 +3,7 @@
 """
 from werkzeug.routing import Rule, Map, Submount
 
+
 class Router(object):
     view = None
     rules = None
