@@ -4,7 +4,7 @@ from werkzeug.exceptions import HTTPException
 
 class Application(object):
 
-    def __init__(self, root_url):
+    def __init__(self, root_url, config=None):
         self.url = root_url
 
     def wsgi_app(self, environ, start_response):
