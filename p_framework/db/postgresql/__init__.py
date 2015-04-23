@@ -33,3 +33,22 @@ class DB(DatabaseWrapper):
             self.cursor().execute("""DROP DATABASE %s""" % (database_name,))
         except Exception, e:
             raise DropError(e)
+
+    def create_table(self, table, **kwargs):
+
+        if not kwargs:
+            raise CreateError("you must specify columns")
+
+        columns = " ".format(
+            ["{} {}".format(k, v) for k, v in kwargs.iteritems()])
+
+        try:
+            self.cursor().execute("CREATE TABLE %s (%s)" % (table, columns))
+        except Exception, e:
+            raise CreateError(e)
+
+    def drop_table(self, table):
+        try:
+            self.cursor().execute("DROP TABLE %s" % (table,))
+        except Exception, e:
+            raise DropError(e)
