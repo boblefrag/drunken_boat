@@ -1,0 +1,2 @@
+class DatabaseWrapper(object):
+    pass
