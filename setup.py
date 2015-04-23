@@ -16,7 +16,7 @@ setup(
     packages=['p_framework'],
     long_description=read('README.rst'),
     install_requires = ["werkzeug", "jinja2"],
-    tests_require = ["pytest", "pytest-cov"],
+    tests_require = ["pytest-cov", "pytest"],
     test_suite = "test",
     test_loader = "runtests:PyTest",
     classifiers=[
