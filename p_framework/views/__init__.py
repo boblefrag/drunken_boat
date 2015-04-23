@@ -1,5 +1,6 @@
 from werkzeug.exceptions import MethodNotAllowed
 
+
 class View(object):
     def render(self, request, **kwargs):
         try:

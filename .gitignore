@@ -1,6 +1,6 @@
 *.coverage
 *~
-*.egg/
+*.egg
 *.pyc
 *egg-info
 *venv
