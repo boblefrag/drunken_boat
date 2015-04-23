@@ -4,15 +4,16 @@ P-Framework
 Performance based web framework written in python
 
 #### home/router.py ####
-from p_framework import Router
+from p_framework.router import Router
 from home.views import HomeView
 
 class Home(Router):
-    url = "^/home/$"
     view = HomeView
 
+home_url = Home("/home/")
+
 #### articles/router.py ####
-from p_framework import Router
+from p_framework.router import Router
 from articles.views import (DetailView, ListView)
 
 class Detail(Router):
@@ -20,11 +21,12 @@ class Detail(Router):
     view = DetailView
 
 class Articles(Router):
-    url = "^/articles/"
     view = ListView
     patterns = [
-    Detail
+    Detail("/<int:id>/")
     ]
+
+articles_url = Articles("/articles/")
 
 #### articles/views ####
 from p_framework import View
