@@ -38,15 +38,59 @@ def test_cursor_exist():
     assert isinstance(c, cursor)
 
 
-def test_drop_error():
+def test_drop_database_error():
     db = DB(database="dummy_db")
     pytest.raises(DropError,
                   db.drop_database,
                   "dummy_db")
 
 
-def test_create_error():
+def test_create_database_error():
     db = DB(database="dummy_db")
     pytest.raises(CreateError,
                   db.create_database,
                   "dummy_db")
+
+
+def test_create_table():
+    drop_db()
+    create_db()
+    db = DB(database="dummy_db")
+    assert db.create_table("dummy", id="serial PRIMARY KEY") is None
+
+
+def test_drop_table():
+    drop_db()
+    create_db()
+    db = DB(database="dummy_db")
+    db.create_table("dummy", id="serial PRIMARY KEY")
+    assert db.drop_table("dummy") is None
+
+
+def test_create_table_raise_columns():
+    """
+    raise in creating the database because columns informations does not
+    exists
+    """
+    drop_db()
+    create_db()
+    db = DB(database="dummy_db")
+    pytest.raises(CreateError, db.create_table, "dummy")
+
+
+def test_create_table_raise_already_exists():
+    drop_db()
+    create_db()
+    db = DB(database="dummy_db")
+    db.create_table("dummy", id="serial PRIMARY KEY")
+    pytest.raises(CreateError,
+                  db.create_table,
+                  "dummy",
+                  id="serial PRIMARY KEY")
+
+
+def test_drop_table_raise():
+    drop_db()
+    create_db()
+    db = DB(database="dummy_db")
+    pytest.raises(DropError, db.drop_table, "dummy")
