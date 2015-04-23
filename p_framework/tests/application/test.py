@@ -16,6 +16,11 @@ class ArticleRouter(Router):
     view = ArticleView
 
 
+class CustomApplication(Application):
+    def config(self, config={}):
+        for k, v in config.iteritems():
+            setattr(self, k, v)
+
 def config_application():
     articles_url = ArticleRouter("/home/")
     test_app = Application(articles_url)
@@ -36,3 +41,11 @@ def test_application_method_not_allowed():
     c = config_application()
     resp = c.post('/home/')
     assert resp.status_code == 405
+
+def test_conf_app():
+    articles_url = ArticleRouter("/home/")
+    test_app = CustomApplication(articles_url)
+    conf = {"foo": "bar"}
+    test_app.config(conf)
+    assert hasattr(test_app, "foo")
+    assert test_app.foo == "bar"
