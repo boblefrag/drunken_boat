@@ -1,6 +1,6 @@
 import psycopg2
-from p_framework.db import DatabaseWrapper
-from p_framework.db.exceptions import ConnectionError, CreateError, DropError
+from drunken_boat.db import DatabaseWrapper
+from drunken_boat.db.exceptions import ConnectionError, CreateError, DropError
 
 
 class DB(DatabaseWrapper):
