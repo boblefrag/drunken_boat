@@ -3,79 +3,28 @@ P-Framework
 
 Performance based web framework written in python
 
-#### home/router.py ####
+A simple Hello World
+--------------------
+
+from p_framework import Application
 from p_framework.router import Router
-from home.views import HomeView
-
-class Home(Router):
-    view = HomeView
-
-home_url = Home("/home/")
-
-#### articles/router.py ####
-from p_framework.router import Router
-from articles.views import (DetailView, ListView)
-
-class Detail(Router):
-    url = "(?P<pk>\d+)"
-    view = DetailView
-
-class Articles(Router):
-    view = ListView
-    patterns = [
-    Detail("/<int:id>/")
-    ]
-
-articles_url = Articles("/articles/")
-
-#### articles/views ####
-from p_framework import View
-from articles.db import ArticleList, ArticleDetail
-from articles.templates import List
-
-class ListView(View):
-
-    def get(request):
-        template = Detail
-        return List(ArticleList.get(limit=10))
-
-    def post(request):
-        pass
-
-    def put(request):
-        pass
-
-    def delete(request):
-        pass
-##### articles/db #########
-from p_framework.db.backend.postgresql import DB
-from articles.router import Detail
-
-class AuthorForeign(DB):
-    _table = "author"
-    firstname = DB.VarChar()
-    lastname = DB.VarChar()
+from p_framework.views import View
+from werkzeug.wrappers import Response
 
 
-class ArticleList(DB):
-    _table = "article"
-    id = DB.PositiveInteger()
-    title = DB.VarChar()
-    author = DB.ForeignKey(AuthorForeign)
-    introduction = DB.Text()
+class ArticleView(View):
 
-    def url(self):
-        return Detail.get_url(self.id)
-#### articles/templates ####
-from p_framework.templates import HTML
+    def get(self, request, **kwargs):
+        response = Response('Hello World!', mimetype='text/plain')
+        return response
 
-class Detail(HTML):
-    def get_path(self):
-        return "articles/templates/html/article_list.html"
 
-#### articles/templates/html/article_list.html ####
-{% for article in articles %}
-<h3>{{article.title}} by {{article.author.firstname}} {{article.author.lastname}}</h3>
-<p>{{article.introduction}}</p>
-<a href="{{article.url}}">read more</a>
-{% endfor %}
+class ArticleRouter(Router):
+    view = ArticleView
+
+
+if __name__ == '__main__':
+    from werkzeug.serving import run_simple
+    articles_url = ArticleRouter("/home/")
+    app = Application(articles_url)
+    run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)

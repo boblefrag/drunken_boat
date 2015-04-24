@@ -1,6 +1,6 @@
 import pytest
-from p_framework.db.postgresql import DB
-from p_framework.db.exceptions import ConnectionError, CreateError, DropError
+from drunken_boat.db.postgresql import DB
+from drunken_boat.db.exceptions import ConnectionError, CreateError, DropError
 
 from psycopg2._psycopg import cursor
 

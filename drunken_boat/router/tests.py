@@ -1,4 +1,4 @@
-from p_framework.router import Router
+from drunken_boat.router import Router
 from werkzeug.routing import Map
 
 
