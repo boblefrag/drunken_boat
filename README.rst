@@ -8,9 +8,9 @@ A simple Hello World
 
 ::
 
-   from p_framework import Application
-   from p_framework.router import Router
-   from p_framework.views import View
+   from drunken_boat import Application
+   from drunken_boat.router import Router
+   from drunken_boat.views import View
    from werkzeug.wrappers import Response
 
 
