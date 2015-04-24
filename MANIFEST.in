@@ -1,0 +1,3 @@
+recursive-include drunken_boat *
+global-exclude *.pyc
+include README.rst CHANGELOG.rst
