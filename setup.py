@@ -14,7 +14,7 @@ setup(
     description=("Performance based web framework written in python"),
     license = "BSD",
     keywords = "framework web performances",
-    url = "http://packages.python.org/an_example_pypi_project",
+    url = "https://github.com/boblefrag/drunken_boat",
     packages=['drunken_boat'],
     long_description=read('README.rst'),
     install_requires = ["werkzeug", "jinja2"],
