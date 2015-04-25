@@ -9,8 +9,10 @@ class Router(object):
     rules = None
     patterns = None
 
-    def __init__(self, url):
+    def __init__(self, url, view=None):
         self.url = url
+        if view:
+            self.view = view
 
     def build_rules(self, prefix=None):
         rules = []

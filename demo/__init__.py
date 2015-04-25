@@ -11,12 +11,9 @@ class ArticleView(View):
         return response
 
 
-class ArticleRouter(Router):
-    view = ArticleView
-
-
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
-    articles_url = ArticleRouter("/home/")
-    app = Application(articles_url)
+    app = Application(
+        Router("/home/", view=ArticleView)
+    )
     run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
