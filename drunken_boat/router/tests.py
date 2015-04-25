@@ -30,6 +30,12 @@ class Home(Router):
     view = HomeView
 
 
+class AllInOneRouter(Router):
+    patterns = [Router("/home/", view=HomeView),
+                Router("/articles/", view=ArticleView),
+                Router("/article/<int:id>", view=ArticleView)]
+
+
 def test_rules_is_map():
     home = Home("/home")
     assert isinstance(home.build_rules(), Map)
@@ -82,3 +88,12 @@ def test_detail_router_with_params_regexp():
     t = detail_router.build_rules()
     assert t._rules[0]._regex.pattern == "^\|\/article\/(?P<id>\d+)$"
     assert list(t._rules[0].arguments)[0] == "id"
+
+
+def test_allinone_router():
+    router = AllInOneRouter("/base/")
+    t = router.build_rules()
+    assert len(t._rules) == 3
+    assert t._rules[0].rule == "/base/home/"
+    assert t._rules[1].rule == "/base/articles/"
+    assert t._rules[2].rule == "/base/article/<int:id>"
