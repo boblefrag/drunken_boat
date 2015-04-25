@@ -31,9 +31,13 @@ class Home(Router):
 
 
 class AllInOneRouter(Router):
-    patterns = [Router("/home/", view=HomeView),
-                Router("/articles/", view=ArticleView),
-                Router("/article/<int:id>", view=ArticleView)]
+    patterns = [
+        Router("/home/", view=HomeView),
+        Router("/articles/",
+               view=ArticleView,
+               patterns=[Router("/<int:id>",
+                                view=ArticleView)]),
+    ]
 
 
 def test_rules_is_map():
@@ -96,4 +100,4 @@ def test_allinone_router():
     assert len(t._rules) == 3
     assert t._rules[0].rule == "/base/home/"
     assert t._rules[1].rule == "/base/articles/"
-    assert t._rules[2].rule == "/base/article/<int:id>"
+    assert t._rules[2].rule == "/base/articles/<int:id>"
