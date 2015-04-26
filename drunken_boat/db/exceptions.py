@@ -8,3 +8,7 @@ class CreateError(Exception):
 
 class DropError(Exception):
     pass
+
+
+class NotFoundError(Exception):
+    pass

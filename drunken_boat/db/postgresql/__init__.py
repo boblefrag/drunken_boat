@@ -1,7 +1,8 @@
 import psycopg2
-
+import os
 from drunken_boat.db import DatabaseWrapper
-from drunken_boat.db.exceptions import ConnectionError, CreateError, DropError
+from drunken_boat.db.exceptions import (ConnectionError, CreateError,
+                                        DropError)
 
 
 class DB(DatabaseWrapper):
@@ -55,7 +56,6 @@ class DB(DatabaseWrapper):
             raise DropError(e)
 
     def get_primary_key(self, table):
-        import os
         sql = os.path.join(os.path.dirname(__file__),
                            "sql",
                            "get_primary_key.sql")
