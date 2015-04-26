@@ -40,3 +40,6 @@ A simple Hello World
             Router("/home/", view=ArticleView)
         )
         run_simple('127.0.0.1', 5000, app, use_debugger=True, use_reloader=True)
+
+
+See https://readthedocs.org/projects/drunken-boat/ for full documentation
