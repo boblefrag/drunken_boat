@@ -9,3 +9,5 @@ script:
 before_script:
   - psql -c 'create database dummy_db;' -U postgres
   - mv travis_config.py test_config.py
+after_success:
+  - coveralls
