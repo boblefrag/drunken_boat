@@ -19,7 +19,7 @@ class Application(object):
             endpoint, kwargs = urls.match()
 
             return endpoint().render(request, **kwargs)
-        except HTTPException, e:
+        except HTTPException as e:
             return e
 
     def __call__(self, environ, start_response):
