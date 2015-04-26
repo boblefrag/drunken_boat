@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name="drunken_boat",
-    version='0.0.2.dev0',
+    version='0.0.2',
     author="Yohann Gabory",
     author_email="yohann@gabory.fr",
     description=("Performance based web framework written in python"),
