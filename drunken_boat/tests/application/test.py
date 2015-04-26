@@ -18,7 +18,7 @@ class ArticleRouter(Router):
 
 class CustomApplication(Application):
     def config(self, config={}):
-        for k, v in config.iteritems():
+        for k, v in config.items():
             setattr(self, k, v)
 
 
