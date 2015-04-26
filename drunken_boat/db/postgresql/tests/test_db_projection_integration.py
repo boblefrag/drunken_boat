@@ -1,6 +1,6 @@
 import pytest
 from drunken_boat.db.exceptions import NotFoundError
-from drunken_boat.db.postgresql.tests import drop_db, create_db
+from drunken_boat.db.postgresql.tests import drop_db, create_db, get_test_db
 from drunken_boat.db.postgresql.projections import Projection, DataBaseObject
 from drunken_boat.db.postgresql.fields import CharField
 from drunken_boat.db.postgresql import DB
@@ -25,7 +25,7 @@ class TestRaiseProjectionWithNoGetTable(Projection):
 def prepare_test():
     drop_db()
     create_db()
-    db = DB(database="dummy_db")
+    db = get_test_db()
     db.create_table("dummy",
                     id="serial PRIMARY KEY",
                     title="character varying (10)",
@@ -65,24 +65,24 @@ def test_projection_get_by_py(prepare_test):
 
 
 def test_raising_projection(prepare_test):
-    pytest.raises(ValueError, TestRaiseProjection, DB(database="dummy_db"))
-    projection = TestRaiseProjectionWithNoGetTable(DB(database="dummy_db"))
+    pytest.raises(ValueError, TestRaiseProjection, get_test_db())
+    projection = TestRaiseProjectionWithNoGetTable(get_test_db())
     pytest.raises(ValueError, projection.select)
 
 
 def test_projection_query(prepare_test):
-    projection = TestProjection(DB(database="dummy_db"))
+    projection = TestProjection(get_test_db())
     query = "select title from dummy"
     assert isinstance(projection.select(query=query)[0], DataBaseObject)
 
 
 def test_projection_results_empty(prepare_test):
-    projection = TestProjection(DB(database="dummy_db"))
+    projection = TestProjection(get_test_db())
     query = "select title from dummy where introduction = %s"
     params = ["nothing"]
     assert len(projection.select(query=query, params=params)) == 0
 
 
 def test_projection_get_by_py_raise(prepare_test):
-    projection = TestProjection(DB(database="dummy_db"))
+    projection = TestProjection(get_test_db())
     pytest.raises(NotFoundError, projection.get_by_pk, 3)
