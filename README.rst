@@ -8,6 +8,9 @@ Drunken Boat
 .. image:: https://travis-ci.org/boblefrag/drunken_boat.svg?branch=master
     :target: https://travis-ci.org/boblefrag/drunken_boat
 
+.. image:: https://readthedocs.org/projects/drunken-boat/badge/?version=stable
+    :target: https://readthedocs.org/projects/drunken-boat/?badge=stable
+
 
 Drunken boat is a performance based webframework under heavy active
 developpment.
