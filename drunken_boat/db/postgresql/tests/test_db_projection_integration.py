@@ -1,4 +1,5 @@
 import pytest
+from drunken_boat.db.exceptions import NotFoundError
 from drunken_boat.db.postgresql.tests import drop_db, create_db
 from drunken_boat.db.postgresql.projections import Projection, DataBaseObject
 from drunken_boat.db.postgresql.fields import CharField
@@ -80,3 +81,8 @@ def test_projection_results_empty(prepare_test):
     query = "select title from dummy where introduction = %s"
     params = ["nothing"]
     assert len(projection.select(query=query, params=params)) == 0
+
+
+def test_projection_get_by_py_raise(prepare_test):
+    projection = TestProjection(DB(database="dummy_db"))
+    pytest.raises(NotFoundError, projection.get_by_pk, 3)

@@ -1,4 +1,5 @@
 from drunken_boat.db.postgresql.fields import Field
+from drunken_boat.db.exceptions import NotFoundError
 
 
 class DataBaseObject(object):
@@ -47,10 +48,14 @@ multitable must define a get_table method""".format(self))
     def get_by_pk(self, pk, *args, **kwargs):
         pk_column = self.db.get_primary_key(self.Meta.table)
         where = "WHERE {} = %s".format(pk_column)
-        print where
         kwargs["params"] = kwargs.get("params", [])
         kwargs["params"].append(pk)
-        return self.select(where=where, params=kwargs["params"])[0]
+        results = self.select(where=where, params=kwargs["params"])
+        if len(results) == 0:
+            raise NotFoundError("{} with value {} does not exists".format(
+                pk_column, pk
+            ))
+        return results[0]
 
     def select(self, *args, **kwargs):
         results = []
