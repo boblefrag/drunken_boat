@@ -1,5 +1,6 @@
 import pytest
 from drunken_boat.db.postgresql import DB
+from drunken_boat.db.postgresql.tests import drop_db, create_db
 from drunken_boat.db.exceptions import ConnectionError, CreateError, DropError
 
 from psycopg2._psycopg import cursor
@@ -7,16 +8,6 @@ from psycopg2._psycopg import cursor
 
 def test_exeption():
     pytest.raises(ConnectionError, DB, database="test")
-
-
-def drop_db():
-    db = DB(database="template1")
-    db.drop_database("dummy_db")
-
-
-def create_db():
-    db = DB(database="template1")
-    db.create_database("dummy_db")
 
 
 def test_select(request):

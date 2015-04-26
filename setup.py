@@ -17,7 +17,7 @@ setup(
     url = "https://github.com/boblefrag/drunken_boat",
     packages=['drunken_boat'],
     long_description=read('README.rst'),
-    install_requires = ["werkzeug", "jinja2"],
+    install_requires = ["werkzeug", "jinja2", "psycopg2"],
     tests_require = ["pytest-codecheckers", "pytest-cov", "pytest"],
     test_suite = "test",
     test_loader = "runtests:PyTest",
