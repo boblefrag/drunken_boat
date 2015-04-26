@@ -6,7 +6,7 @@ Performance based web framework written in python
 A simple Hello World
 --------------------
 
-::
+.. code-block:: python
     from drunken_boat import Application
     from drunken_boat.router import Router
     from drunken_boat.views import View
