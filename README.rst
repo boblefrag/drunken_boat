@@ -1,6 +1,14 @@
 Drunken Boat
 ------------
 
+.. image::
+   https://coveralls.io/repos/boblefrag/drunken_boat/badge.svg?branch=master
+   :target: https://coveralls.io/r/boblefrag/drunken_boat?branch=master
+
+.. image:: https://travis-ci.org/boblefrag/drunken_boat.svg?branch=master
+    :target: https://travis-ci.org/boblefrag/drunken_boat
+
+
 Performance based web framework written in python
 
 A simple Hello World
