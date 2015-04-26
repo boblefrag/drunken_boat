@@ -18,7 +18,8 @@ setup(
     packages=['drunken_boat'],
     long_description=read('README.rst'),
     install_requires = ["werkzeug", "jinja2", "psycopg2"],
-    tests_require = ["pytest-codecheckers", "pytest-cov", "pytest"],
+    tests_require = ["pytest-codecheckers", "pytest-cov",
+                     "pytest", "python-coveralls"],
     test_suite = "test",
     test_loader = "runtests:PyTest",
     classifiers=[
