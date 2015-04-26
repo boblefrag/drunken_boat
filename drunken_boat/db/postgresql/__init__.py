@@ -1,4 +1,5 @@
 import psycopg2
+
 from drunken_boat.db import DatabaseWrapper
 from drunken_boat.db.exceptions import ConnectionError, CreateError, DropError
 
@@ -15,9 +16,9 @@ class DB(DatabaseWrapper):
     def cursor(self):
         return self.conn.cursor()
 
-    def select(self, query):
+    def select(self, query, params=None):
         with self.cursor() as cur:
-            cur.execute(query)
+            cur.execute(query, params)
             return cur.fetchall()
 
     def create_database(self, database_name):
@@ -39,7 +40,7 @@ class DB(DatabaseWrapper):
         if not kwargs:
             raise CreateError("you must specify columns")
 
-        columns = " ".format(
+        columns = ",".join(
             ["{} {}".format(k, v) for k, v in kwargs.iteritems()])
 
         try:
@@ -52,3 +53,14 @@ class DB(DatabaseWrapper):
             self.cursor().execute("DROP TABLE %s" % (table,))
         except Exception, e:
             raise DropError(e)
+
+    def get_primary_key(self, table):
+        import os
+        sql = os.path.join(os.path.dirname(__file__),
+                           "sql",
+                           "get_primary_key.sql")
+        with open(sql) as sql:
+            with self.cursor() as cursor:
+                cursor.execute(sql.read(), (table, ))
+                result = cursor.fetchone()
+        return result[0]
