@@ -22,6 +22,7 @@ setup(
                      "pytest", "sphinx-pypi-upload"],
     test_suite = "test",
     test_loader = "runtests:PyTest",
+    scripts=['drunken_boat/bin/drunken_run.py'],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
