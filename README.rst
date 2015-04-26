@@ -9,7 +9,12 @@ Drunken Boat
     :target: https://travis-ci.org/boblefrag/drunken_boat
 
 
-Performance based web framework written in python
+Drunken boat is a performance based webframework under heavy active
+developpment.
+
+It offer Routing, View management and a projection based ORM, schema
+less and eventualy agnostic
+
 
 A simple Hello World
 --------------------
