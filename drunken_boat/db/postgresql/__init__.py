@@ -11,7 +11,7 @@ class DB(DatabaseWrapper):
 
         try:
             self.conn = psycopg2.connect(**conn_params)
-        except Exception, e:
+        except Exception as e:
             raise ConnectionError(e)
 
     def cursor(self):
@@ -26,14 +26,14 @@ class DB(DatabaseWrapper):
         try:
             self.conn.set_isolation_level(0)
             self.cursor().execute("""CREATE DATABASE %s""" % (database_name,))
-        except Exception, e:
+        except Exception as e:
             raise CreateError(e)
 
     def drop_database(self, database_name):
         try:
             self.conn.set_isolation_level(0)
             self.cursor().execute("""DROP DATABASE %s""" % (database_name,))
-        except Exception, e:
+        except Exception as e:
             raise DropError(e)
 
     def create_table(self, table, **kwargs):
@@ -42,17 +42,17 @@ class DB(DatabaseWrapper):
             raise CreateError("you must specify columns")
 
         columns = ",".join(
-            ["{} {}".format(k, v) for k, v in kwargs.iteritems()])
+            ["{} {}".format(k, v) for k, v in kwargs.items()])
 
         try:
             self.cursor().execute("CREATE TABLE %s (%s)" % (table, columns))
-        except Exception, e:
+        except Exception as e:
             raise CreateError(e)
 
     def drop_table(self, table):
         try:
             self.cursor().execute("DROP TABLE %s" % (table,))
-        except Exception, e:
+        except Exception as e:
             raise DropError(e)
 
     def get_primary_key(self, table):
