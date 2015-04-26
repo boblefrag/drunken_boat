@@ -13,7 +13,7 @@ class Projection(object):
 
     def __new__(cls, *args, **kwargs):
         cls.fields = []
-        for name, attr in cls.__dict__.iteritems():
+        for name, attr in cls.__dict__.items():
             if isinstance(attr, Field):
                 if not getattr(attr, "name"):
                     attr.name = name
