@@ -19,7 +19,7 @@ setup(
     long_description=read('README.rst'),
     install_requires = ["werkzeug", "jinja2", "psycopg2"],
     tests_require = ["pytest-codecheckers", "pytest-cov",
-                     "pytest", "sphinx-pypi-upload", "alabaster"],
+                     "pytest", "sphinx-pypi-upload"],
     test_suite = "test",
     test_loader = "runtests:PyTest",
     classifiers=[
