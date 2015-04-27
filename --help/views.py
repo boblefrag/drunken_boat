@@ -1,8 +1,0 @@
-from drunken_boat.views import View
-from werkzeug.wrappers import Response
-
-
-class MainView(View):
-    def get(self, request, **kwargs):
-        response = Response('Hello World!', mimetype='text/plain')
-        return response
