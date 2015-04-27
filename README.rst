@@ -46,6 +46,7 @@ directory with base file structure to start working::
       -- router.py
       -- views.py
       -- projection.py
+      -- config.py
 
 content of `application.py`::
 
