@@ -28,7 +28,9 @@ example_project/
             self.projet_name = argv[2]
             self.project_root = os.path.join(os.getcwd(), argv[2])
             os.mkdir(os.path.join(os.getcwd(), argv[2]))
-            for tmpl in ["application", "router", "views", "__init__"]:
+            for tmpl in ["application", "router",
+                         "views", "__init__",
+                         "config", "projections"]:
                 self.create_template(tmpl)
             sys.stdout.write("""project {} initialized.
 To start your application:

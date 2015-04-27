@@ -26,7 +26,8 @@ def test_bootstrap():
     assert command.execute() == None
     root_path = os.path.join(os.getcwd(), "dummy_project")
     assert os.path.exists(root_path)
-    for path in ["application", "router", "views", "__init__"]:
+    for path in ["application", "router", "views", "__init__",
+                 "config", "projections"]:
         assert os.path.exists(os.path.join(root_path))
 
     from dummy_project import application
