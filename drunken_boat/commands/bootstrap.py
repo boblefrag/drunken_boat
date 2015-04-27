@@ -20,6 +20,7 @@ example_project/
 -- router.py
 -- views.py
 -- projection.py
+-- config.py
 """.format(os.getcwd())
 
     def execute(self, argv):
