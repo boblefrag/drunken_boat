@@ -1,6 +1,6 @@
 import os
 import sys
-from cStringIO import StringIO
+from StringIO import StringIO
 from shutil import rmtree
 from drunken_boat.commands import UtilCommand
 from drunken_boat.commands.bootstrap import Command
