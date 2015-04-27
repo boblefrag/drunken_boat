@@ -1,0 +1,5 @@
+DATABASE = {
+    "database": "{{project_name}}",
+    "user": "postgres",
+    "password": "secret"
+}
