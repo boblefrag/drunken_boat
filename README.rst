@@ -38,14 +38,14 @@ Project Layout
 --------------
 
 drunken_run.py bootstrap example_blog create a new `example_blog`
-directory with base file structure to start working:
+directory with base file structure to start working::
 
-example_blog/
--- __init__.py
--- application.py
--- router.py
--- views.py
--- projection.py
+    example_blog/
+      -- __init__.py
+      -- application.py
+      -- router.py
+      -- views.py
+      -- projection.py
 
 content of `application.py`::
 
