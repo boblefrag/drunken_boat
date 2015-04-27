@@ -7,6 +7,7 @@ Contents:
    :titlesonly:
 
    install
+   tutorial
    about/index
    contributing
 
