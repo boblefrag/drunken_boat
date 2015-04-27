@@ -11,18 +11,19 @@ Second is static schema. Database are not bound to a schema, they are
 bound to projections. Here is an example, let say you have this
 database schema:
 
-Table « public.bookstore_store »
+Table bookstore_store::
 
- id          | integer                | not NULL default, nextval('bookstore_store_id_seq'::regclass)
- name        | character varying(250) | not NULL
- close_time  | integer                | not NULL
- open_time   | integer                | not NULL
- open_date   | date                   | not NULL
- location_id | integer                | not NULL
+  id          | integer                | not NULL default, nextval('bookstore_store_id_seq'::regclass)
+  name        | character varying(250) | not NULL
+  close_time  | integer                | not NULL
+  open_time   | integer                | not NULL
+  open_date   | date                   | not NULL
+  location_id | integer                | not NULL
 
+Table bookstore_location::
 
- id      | integer                | not NULL default, nextval('bookstore_location_id_seq'::regclass)
- name    | character varying(250) | non NULL
+  id      | integer                | not NULL default, nextval('bookstore_location_id_seq'::regclass)
+  name    | character varying(250) | non NULL
 
 
 a store object will always have the representation ::
