@@ -1,0 +1,12 @@
+from {{project_name}}.config import DATABASE
+from drunken_boat.db.postgresql import DB
+from drunken_boat.db.postgresql.projections import Projection
+
+
+class ExampleProjection(Projection):
+    """
+    Here you can write your real projections
+    """
+    pass
+
+example_projection = ExampleProjection(DB(**DATABASE))
