@@ -1,6 +1,7 @@
 import sys
 import os
 from jinja2 import Template
+
 from drunken_boat.commands import BaseCommand
 
 
@@ -22,6 +23,7 @@ example_project/
 """.format(os.getcwd())
 
     def execute(self, argv):
+        self.parser.add_argument("project_name", help=self.get_help())
         if len(argv) < 3:
             self.get_help()
         else:
