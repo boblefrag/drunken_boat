@@ -9,4 +9,4 @@ class ExampleProjection(Projection):
     """
     pass
 
-example_projection = DB(**DATABASE)
+example_projection = ExampleProjection(DB(**DATABASE))
