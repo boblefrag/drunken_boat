@@ -1,6 +1,9 @@
 import os
 import sys
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 from shutil import rmtree
 from drunken_boat.commands import UtilCommand
 from drunken_boat.commands.bootstrap import Command
