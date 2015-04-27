@@ -15,7 +15,7 @@ def find_commands(path):
     return [name for _,
             name,
             is_pkg in pkgutil.iter_modules([path])
-            if not is_pkg and not name.startswith('_')]
+            if not is_pkg and not name.startswith('_')and not name == "tests"]
 
 
 class UtilCommand(object):
