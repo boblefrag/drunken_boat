@@ -14,6 +14,7 @@ This will create a new directory named example_project in {} with base
 file structure to start working:
 
 example_project/
+-- __init__.py
 -- application.py
 -- router.py
 -- views.py
