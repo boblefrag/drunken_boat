@@ -1,5 +1,4 @@
 import os
-import subprocess
 from shutil import rmtree
 from drunken_boat import commands
 from drunken_boat.commands.bootstrap import Command
@@ -16,7 +15,6 @@ def test_bootstrap():
     assert command.execute() == None
     argvs.append("dummy_project")
     assert command.execute() == None
-    assert subprocess.call(["drunken_run.py", "bootstrap"]) == 0
     root_path = os.path.join(os.getcwd(), "dummy_project")
     assert os.path.exists(root_path)
     for path in ["application", "router", "views", "__init__"]:
