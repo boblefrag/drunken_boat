@@ -1,29 +1,22 @@
 import os
-import sys
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+import subprocess
 from shutil import rmtree
-from drunken_boat.commands import UtilCommand
+from drunken_boat import commands
 from drunken_boat.commands.bootstrap import Command
 from drunken_boat.bin import drunken_run
 
 
 def test_bootstrap():
     argvs = [os.path.abspath(drunken_run.__file__)]
-    command = UtilCommand(argvs)
+    command = commands.UtilCommand(argvs)
+    assert Command().execute(argvs) == None
+    assert commands.run_command(argvs) == None
     assert command.execute() == None
     argvs.append("bootstrap")
-    command_result = StringIO()
-    expected_result = StringIO()
-    sys.stdout = command_result
-    command.execute()
-    sys.stdout = expected_result
-    Command().get_help()
-    assert command_result.getvalue() == expected_result.getvalue()
+    assert command.execute() == None
     argvs.append("dummy_project")
     assert command.execute() == None
+    assert subprocess.call(["drunken_run.py", "bootstrap"]) == 0
     root_path = os.path.join(os.getcwd(), "dummy_project")
     assert os.path.exists(root_path)
     for path in ["application", "router", "views", "__init__"]:
