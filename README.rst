@@ -51,7 +51,7 @@ directory with base file structure to start working::
 content of `application.py`::
 
     from drunken_boat import Application
-    from dummy_project.router import MainRouter
+    from example_blog.router import MainRouter
 
     app = Application(
             MainRouter("/")
@@ -68,7 +68,7 @@ responsible for routing the incomming requests.
 content of `router.py`::
 
     from drunken_boat.router import Router
-    from dummy_project.views import MainView
+    from example_blog.views import MainView
 
 
     class MainRouter(Router):
