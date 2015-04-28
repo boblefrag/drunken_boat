@@ -10,6 +10,7 @@ Contents:
    tutorial
    about/index
    contributing
+   orm
 
 
 Indices and tables
