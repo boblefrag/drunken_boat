@@ -51,6 +51,7 @@ Let say you make this query::
 the corresponding projection will just fit::
 
   class UserNameAge(Projection):
+
       name = CharField()
       age = Timestamp(name="age(birthdate)")
 
@@ -60,6 +61,7 @@ the corresponding projection will just fit::
   projection = UserNameAge(DB(**connection_params))
 
 
+<<<<<<< HEAD
 And you can get your results as easily as::
 
   >> users = projection.select()
@@ -98,3 +100,14 @@ objects, you can attach any method you want on it. For example::
   >>> t = example_projection.select()
   >>> t[0].display_birthyear_and_days()
   '13850 days since 1977'
+=======
+And you can get your user as easily as::
+
+  users = projection.select()
+  for user in users:
+      print(user.name, user.age)
+  ben 23
+  john 54
+  anna 34
+  ...
+>>>>>>> master
