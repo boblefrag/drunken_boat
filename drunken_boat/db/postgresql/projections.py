@@ -72,11 +72,11 @@ multitable must define a get_table method""".format(self))
             fields = []
             for field in self.fields:
                 if not field.virtual:
-                    fields.append(
-                        ('"{}"."{}"'.format(field.table, field.db_name)))
+                    fields.append('"{}"."{}"'.format(field.table,
+                                                     field.db_name))
                 else:
                     fields.append(field.db_name)
-            select_query = " ".join(fields)
+            select_query = ", ".join(fields)
             query = "SELECT {} FROM {} {} {}".format(
                 select_query,
                 table,
@@ -85,11 +85,19 @@ multitable must define a get_table method""".format(self))
             )
         db_results = self.db.select(query, kwargs.get("params"))
         for result in db_results:
+            if not hasattr(self, "Meta") or not hasattr(
+                    self.Meta, "database_object"):
+                database_object = DataBaseObject
+            else:
+                database_object = self.Meta.database_object
             results.append(
-                DataBaseObject(
+                database_object(
                     self.fields,
                     **dict(zip(
                         [field.name for field in self.fields],
                         result)))
             )
         return results
+
+        class Meta:
+            database_object = DataBaseObject
