@@ -98,6 +98,3 @@ multitable must define a get_table method""".format(self))
                         result)))
             )
         return results
-
-        class Meta:
-            database_object = DataBaseObject
