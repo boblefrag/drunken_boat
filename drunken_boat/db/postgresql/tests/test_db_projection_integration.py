@@ -1,9 +1,16 @@
 import pytest
+import datetime
 from drunken_boat.db.exceptions import NotFoundError
 from drunken_boat.db.postgresql.tests import drop_db, create_db, get_test_db
 from drunken_boat.db.postgresql.projections import Projection, DataBaseObject
-from drunken_boat.db.postgresql.fields import CharField
+from drunken_boat.db.postgresql.fields import CharField, Timestamp
 from drunken_boat.db.postgresql import DB
+
+
+class DataBaseObjectWithMeth(DataBaseObject):
+
+    def age_hours(self):
+        return self.age.hours
 
 
 class TestProjection(Projection):
@@ -15,6 +22,15 @@ class TestProjection(Projection):
 
 class TestRaiseProjection(Projection):
     title = CharField()
+
+
+class TestProjectionWithVirtual(Projection):
+    title = CharField()
+    age = Timestamp(db_name="age(birthdate)", virtual=True)
+
+    class Meta:
+        table = "dummy"
+        database_object = DataBaseObjectWithMeth
 
 
 class TestRaiseProjectionWithNoGetTable(Projection):
@@ -29,13 +45,22 @@ def prepare_test():
     db.create_table("dummy",
                     id="serial PRIMARY KEY",
                     title="character varying (10)",
-                    introduction="text")
+                    introduction="text",
+                    birthdate="timestamp")
     db.conn.commit()
     with db.cursor() as cur:
-        cur.execute("INSERT INTO dummy (title, introduction) VALUES (%s, %s)",
-                    ("hello", "This is an introduction"))
-        cur.execute("INSERT INTO dummy (title, introduction) VALUES (%s, %s)",
-                    ("goodbye", "This is an a leaving"))
+        cur.execute("""INSERT INTO dummy (title,
+                                          introduction,
+                                          birthdate) VALUES (%s, %s, %s)""",
+                    ("hello",
+                     "This is an introduction",
+                     datetime.datetime(2000, 3, 14)))
+        cur.execute("""INSERT INTO dummy (title,
+                                        introduction,
+                                        birthdate) VALUES (%s, %s, %s)""",
+                    ("goodbye",
+                     "This is an a leaving",
+                     datetime.datetime(2010, 5, 25)))
         db.conn.commit()
 
     return db
@@ -83,3 +108,9 @@ def test_projection_results_empty(prepare_test):
 def test_projection_get_by_py_raise(prepare_test):
     projection = TestProjection(get_test_db())
     pytest.raises(NotFoundError, projection.get_by_pk, 3)
+
+
+def test_projection_with_vitual(prepare_test):
+    projection = TestProjectionWithVirtual(get_test_db())
+    results = projection.select()
+    assert isinstance(results[0].age, datetime.timedelta)
