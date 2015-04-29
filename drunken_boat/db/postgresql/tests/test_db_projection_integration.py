@@ -54,13 +54,13 @@ def prepare_test():
                                           birthdate) VALUES (%s, %s, %s)""",
                     ("hello",
                      "This is an introduction",
-                     datetime.datetime(2000, 03, 14)))
+                     datetime.datetime(2000, 3, 14)))
         cur.execute("""INSERT INTO dummy (title,
                                         introduction,
                                         birthdate) VALUES (%s, %s, %s)""",
                     ("goodbye",
                      "This is an a leaving",
-                     datetime.datetime(2010, 05, 25)))
+                     datetime.datetime(2010, 5, 25)))
         db.conn.commit()
 
     return db
