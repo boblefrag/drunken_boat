@@ -51,8 +51,9 @@ Let say you make this query::
 the corresponding projection will just fit::
 
   class UserNameAge(Projection):
+
       name = CharField()
-      age = IntegerField(name="age(birthdate)")
+      age = Timestamp(name="age(birthdate)")
 
       class Meta:
           table = "user"
@@ -60,6 +61,46 @@ the corresponding projection will just fit::
   projection = UserNameAge(DB(**connection_params))
 
 
+<<<<<<< HEAD
+And you can get your results as easily as::
+
+  >> users = projection.select()
+  >> users[0].age
+  datetime.timedelta(13850, 50160)
+
+results are list of `DataBaseObject`. because DataBaseObject are
+objects, you can attach any method you want on it. For example::
+
+  from drunken_boat.db.postgresql.fields import Timestamp
+  from drunken_boat.db.postgresql.projections import (Projection,
+                                                      DataBaseObject)
+  class ExampleDataBaseObject(DataBaseObject):
+
+      def display_birthyear_and_days(self):
+          days = self.age.days
+          year = self.birthdate.year
+          return "{} days since {}".format(days, year)
+
+  class ExampleProjection(Projection):
+      """
+      Here you can write your real projections
+      """
+
+      age = Timestamp(db_name="age(birthday)", virtual=True)
+      birthdate = Timestamp()
+
+      class Meta:
+          table = "test"
+          database_object = ExampleDataBaseObject
+
+  example_projection = ExampleProjection(DB(**DATABASE))
+
+
+  >>> from projections import example_projection
+  >>> t = example_projection.select()
+  >>> t[0].display_birthyear_and_days()
+  '13850 days since 1977'
+=======
 And you can get your user as easily as::
 
   users = projection.select()
@@ -69,3 +110,4 @@ And you can get your user as easily as::
   john 54
   anna 34
   ...
+>>>>>>> master

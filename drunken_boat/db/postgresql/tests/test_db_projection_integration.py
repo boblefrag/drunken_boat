@@ -7,18 +7,18 @@ from drunken_boat.db.postgresql import DB
 
 
 class TestProjection(Projection):
-    title = CharField(10)
+    title = CharField()
 
     class Meta:
         table = "dummy"
 
 
 class TestRaiseProjection(Projection):
-    title = CharField(10)
+    title = CharField()
 
 
 class TestRaiseProjectionWithNoGetTable(Projection):
-    title = CharField(10, table="dummy")
+    title = CharField(table="dummy")
 
 
 @pytest.fixture(scope="module")
@@ -51,11 +51,8 @@ def test_projection_select(prepare_test):
     projection = TestProjection(DB(database="dummy_db"))
     results = projection.select()
     assert isinstance(results[0], DataBaseObject)
-    assert results[0].title.value == "hello"
-    assert results[0].title.__repr__() == "hello"
-    assert results[1].title.__repr__() == "goodbye"
-    assert isinstance(results[0].title, CharField)
-    assert isinstance(results[1].title, CharField)
+    assert results[0].title == "hello"
+    assert results[1].title == "goodbye"
 
 
 def test_projection_get_by_py(prepare_test):
