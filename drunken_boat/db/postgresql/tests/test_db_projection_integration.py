@@ -9,8 +9,8 @@ from drunken_boat.db.postgresql import DB
 
 class DataBaseObjectWithMeth(DataBaseObject):
 
-    def age_hours(self):
-        return self.age.hours
+    def age_seconds(self):
+        return self.age.total_seconds()
 
 
 class TestProjection(Projection):
@@ -114,3 +114,4 @@ def test_projection_with_vitual(prepare_test):
     projection = TestProjectionWithVirtual(get_test_db())
     results = projection.select()
     assert isinstance(results[0].age, datetime.timedelta)
+    assert isinstance(results[0].age_seconds(), float)
