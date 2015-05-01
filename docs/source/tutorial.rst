@@ -46,7 +46,7 @@ connection informations of your database.
 
 Even if drunken_boat don't force you to create table from python, for
 this tutorial you can use this simple script to generate the table you
-will use in the next step of the tutorial::
+will use in the next step::
 
   #projection.py
   from example_blog.config import DATABASE
@@ -140,7 +140,7 @@ Projection:insert
 
 Even if you do not describe the table schema of your tables,
 drunken_boat introspect your table schema to give you automatic
-validation of data befor even hitting the database.
+validation of data before even hitting the database.
 
 To demonstrate this behavior let's create another table::
 
@@ -169,7 +169,7 @@ And another projection::
 Now, with a shell try to insert some data in the table::
 
   >>> from projections import example_projection
-  >>> example_projection.insert({})
+  >>> example_projection.insert({"birthday": datetime.datetime.now()})
   ValueError: num of type integer is required
   data of type character varying is required
 
