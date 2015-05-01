@@ -5,9 +5,9 @@ from drunken_boat.db.exceptions import NotFoundError
 
 class DataBaseObject(object):
 
-    def __init__(self, fields, *args, **kwargs):
-        for field in fields:
-            setattr(self, field.name, field(kwargs[field.name]))
+    def __init__(self, dict, *args, **kwargs):
+        for k, v in dict.items():
+            setattr(self, k, v)
 
 
 class Query(object):
@@ -23,6 +23,27 @@ class Query(object):
             ))
         return results[0]
 
+    def get_joins(self, *args, **kwargs):
+        joins = []
+        join_id = 0
+        for field in self.fields:
+
+            if hasattr(field, "join"):
+                join_id += 1
+                join_alias = "t{}".format(join_id)
+                joins.append(
+                    """INNER JOIN {table} {join_alias} ON
+                    {from_field}={join_alias}.{to_field}""".format(
+                        table=field.projection.Meta.table,
+                        from_field=field.join[0],
+                        to_field=field.join[1],
+                        join_alias=join_alias
+                    ))
+                field.alias = ", ".join(
+                    ['"{}"."{}"'.format(join_alias, f.db_name)
+                     for f in field.projection(self.db).fields])
+        return " ".join(joins)
+
     def select(self, *args, **kwargs):
         results = []
         if kwargs.get("query"):
@@ -37,10 +58,13 @@ class Query(object):
             fields = []
             for field in self.fields:
                 if not field.virtual:
-                    fields.append('"{}"."{}"'.format(field.table,
-                                                     field.db_name))
+                    fields.append('{}.{}'.format(field.table,
+                                                 field.db_name))
                 else:
-                    fields.append(field.db_name)
+                    if hasattr(field, "alias"):
+                        fields.append(field.alias)
+                    else:
+                        fields.append(field.db_name)
             select_query = ", ".join(fields)
             query = "SELECT {} FROM {} {} {}".format(
                 select_query,
@@ -48,10 +72,11 @@ class Query(object):
                 joins if joins else '',
                 where if where else ''
             )
+
         db_results = self.db.select(query, kwargs.get("params"))
         for result in db_results:
             results.append(
-                self.hydrate(result)
+                self.hydrate(result)[0]
             )
         return results
 
@@ -65,11 +90,18 @@ class Query(object):
         return database_object
 
     def hydrate(self, result):
-        return self.database_object(
-            self.fields,
-            **dict(zip(
-                [field.name for field in self.fields],
-                result)))
+        r = result
+        obj = {}
+        for field in self.fields:
+            hydrated, r = field.hydrate(r)
+            obj.update(hydrated)
+        return self.database_object(obj), r
+
+        # return self.database_object(
+        #     self.fields,
+        #     **dict(zip(
+        #         [field.name for field in self.fields],
+        #         result)))
 
 
 class Projection(Query):
@@ -105,9 +137,6 @@ class Projection(Query):
                 return self.Meta.table
         raise ValueError("""You does not define {} Meta.table .Projections on
 multitable must define a get_table method""".format(self))
-
-    def get_joins(self, *args, **kwargs):
-        pass
 
     @property
     def get_fields(self):
@@ -173,5 +202,5 @@ multitable must define a get_table method""".format(self))
                 res = cur.fetchone()
         self.db.conn.commit()
         if returning == "self":
-            return self.hydrate(res)
+            return self.hydrate(res)[0]
         return res

@@ -1,4 +1,5 @@
-from drunken_boat.db.postgresql.fields import CharField
+import pytest
+from drunken_boat.db.postgresql.fields import CharField, ForeignKey
 
 
 def test_charfield():
@@ -6,3 +7,4 @@ def test_charfield():
     assert isinstance(title, CharField)
     assert hasattr(title, "db_name")
     assert hasattr(title, "table")
+    pytest.raises(ValueError, ForeignKey, ["a", "b"], CharField)

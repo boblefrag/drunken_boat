@@ -4,7 +4,7 @@ import datetime
 from drunken_boat.db.exceptions import NotFoundError
 from drunken_boat.db.postgresql.tests import drop_db, create_db, get_test_db
 from drunken_boat.db.postgresql.projections import Projection, DataBaseObject
-from drunken_boat.db.postgresql.fields import CharField, Timestamp
+from drunken_boat.db.postgresql.fields import CharField, Timestamp, ForeignKey
 from drunken_boat.db.postgresql import DB
 
 
@@ -38,11 +38,43 @@ class TestRaiseProjectionWithNoGetTable(Projection):
     title = CharField(table="dummy")
 
 
+class AuthorProjection(Projection):
+    name = CharField()
+
+    class Meta:
+        table = "author"
+
+
+class BookProjection(Projection):
+    name = CharField()
+    author = ForeignKey(
+        join=["author_id", "id"],
+        projection=AuthorProjection
+    )
+
+    class Meta:
+        table = "book"
+
+
 @pytest.fixture(scope="module")
 def prepare_test():
     drop_db()
     create_db()
     db = get_test_db()
+    db.create_table("author",
+                    id="serial PRIMARY KEY",
+                    name="varchar(10) NOT NULL")
+    db.conn.commit()
+    db.create_table("book",
+                    id="serial PRIMARY KEY",
+                    name="varchar(10) NOT NULL",
+                    author_id="integer NOT NULL")
+    db.conn.commit()
+    with db.cursor() as cur:
+        cur.execute(
+            "alter table book add foreign key(author_id) references author"
+        )
+    db.conn.commit()
     db.create_table("dummy",
                     id="serial PRIMARY KEY",
                     title="character varying (10) NOT NULL",
@@ -154,3 +186,14 @@ def test_projection_inserting(prepare_test):
         returning="self"
     )
     assert isinstance(doc, DataBaseObjectWithMeth)
+
+
+def test_pojection_foreign(prepare_test):
+    projection_author = AuthorProjection(get_test_db())
+    projection_author.insert(
+        {"name": "author"})
+    projection = BookProjection(get_test_db())
+    projection.insert({"name": "book", "author_id": 1})
+    assert isinstance(projection.select(), list)
+    assert isinstance(projection.select()[0], DataBaseObject)
+    assert isinstance(projection.select()[0].author, DataBaseObject)
