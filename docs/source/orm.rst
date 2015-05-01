@@ -1,5 +1,12 @@
-A word about Projections
-------------------------
+ORM Philosophy
+--------------
+
+.. toctree::
+   :maxdepth: 2
+   :titlesonly:
+
+   orm/database
+
 
 It's common in the ORM world to write your tables schema in your
 python code. This cause majors issues.
@@ -53,6 +60,4 @@ wich will not raise anything but make a query for each field you forget)
 
 Because database can manage this in an admirable manner, and much
 more, we decide to create a schemaless ORM without breaking the Object
-Oriented paradigm. Seems interesting? Let's take the ride!
-
-
+Oriented paradigm. Seems interesting? Let's take the ride! :doc:`orm/database`

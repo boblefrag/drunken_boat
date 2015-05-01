@@ -1,5 +1,3 @@
-.. include:: ../../README.rst
-
 Contents:
 
 .. toctree::
@@ -11,6 +9,8 @@ Contents:
    about/index
    contributing
    orm
+
+.. include:: ../../README.rst
 
 
 Indices and tables
