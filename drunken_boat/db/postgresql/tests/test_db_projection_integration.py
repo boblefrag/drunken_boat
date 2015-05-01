@@ -194,7 +194,6 @@ def test_pojection_foreign(prepare_test):
         {"name": "author"})
     projection = BookProjection(get_test_db())
     projection.insert({"name": "book", "author_id": 1})
-    print projection.select()[0]
     assert isinstance(projection.select(), list)
     assert isinstance(projection.select()[0], DataBaseObject)
     assert isinstance(projection.select()[0].author, DataBaseObject)
