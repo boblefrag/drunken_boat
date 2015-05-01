@@ -7,8 +7,32 @@ class Field(object):
         if kwargs.get("virtual"):
             self.virtual = kwargs["virtual"]
 
-    def __call__(self, value, *args, **kwargs):
-        return value
+    def hydrate(self, result):
+        hydrated = {self.name: result[0]}
+        result = result[1:]
+        return hydrated, result
+
+
+class Related(Field):
+    virtual = True
+
+    def __init__(self, join, projection, *args, **kwargs):
+        from drunken_boat.db.postgresql.projections import Projection
+        if not issubclass(projection, Projection):
+            raise ValueError(
+                "{} Must be a drunken_boat.db.postgresql.projections.\
+Projection instance".format(projection))
+        self.join = join
+        self.projection = projection
+        super(Related, self).__init__(*args, **kwargs)
+
+    def hydrate(self, result):
+        hydrated, result = self.projection(None).hydrate(result)
+        return {self.name: hydrated}, result
+
+
+class ForeignKey(Related):
+    pass
 
 
 class CharField(Field):
@@ -25,3 +49,7 @@ class Integer(Field):
 
 class Timestamp(Field):
     db_type = "timestamp"
+
+
+class Boolean(Field):
+    db_type = "boolean"
