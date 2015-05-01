@@ -1,3 +1,4 @@
+from psycopg2 import DataError
 import pytest
 import datetime
 from drunken_boat.db.exceptions import NotFoundError
@@ -44,8 +45,8 @@ def prepare_test():
     db = get_test_db()
     db.create_table("dummy",
                     id="serial PRIMARY KEY",
-                    title="character varying (10)",
-                    introduction="text",
+                    title="character varying (10) NOT NULL",
+                    introduction="text NOT NULL",
                     birthdate="timestamp")
     db.conn.commit()
     with db.cursor() as cur:
@@ -114,4 +115,42 @@ def test_projection_with_vitual(prepare_test):
     projection = TestProjectionWithVirtual(get_test_db())
     results = projection.select()
     assert isinstance(results[0].age, datetime.timedelta)
+
+
+def test_projection_method(prepare_test):
+    projection = TestProjectionWithVirtual(get_test_db())
+    results = projection.select()
     assert isinstance(results[0].age_seconds(), float)
+
+
+def test_projection_inserting(prepare_test):
+    projection = TestProjectionWithVirtual(get_test_db())
+    pytest.raises(ValueError, projection.insert, {})
+    pytest.raises(ValueError, projection.insert, {"title": "hello"})
+
+    pytest.raises(DataError, projection.insert,
+                  {"title": "hello",
+                   "introduction": "a meaningfull introduction",
+                   "birthdate": "a string"})
+
+    assert projection.insert(
+        {"title": "hello",
+         "introduction": "a meaningfull introduction"}
+    ) is None
+    assert isinstance(projection.insert(
+        {"title": "hello",
+         "introduction": "a meaningfull introduction"},
+        returning="id"
+    ), tuple)
+    doc = projection.insert(
+        {"title": "hello",
+         "introduction": "a meaningfull introduction"},
+        returning="id"
+    )
+    assert isinstance(doc[0], int)
+    doc = projection.insert(
+        {"title": "hello",
+         "introduction": "a meaningfull introduction"},
+        returning="self"
+    )
+    assert isinstance(doc, DataBaseObjectWithMeth)
