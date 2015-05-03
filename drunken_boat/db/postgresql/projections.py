@@ -28,7 +28,7 @@ class Query(object):
         join_id = 0
         for field in self.fields:
 
-            if hasattr(field, "join"):
+            if hasattr(field, "join") and field.make_join:
                 join_id += 1
                 join_alias = "t{}".format(join_id)
                 joins.append(
@@ -57,14 +57,9 @@ class Query(object):
             joins = self.get_joins(*args, **kwargs)
             fields = []
             for field in self.fields:
-                if not field.virtual:
-                    fields.append('{}.{}'.format(field.table,
-                                                 field.db_name))
-                else:
-                    if hasattr(field, "alias"):
-                        fields.append(field.alias)
-                    else:
-                        fields.append(field.db_name)
+                select = field.get_select()
+                if select:
+                    fields.append(select)
             select_query = ", ".join(fields)
             query = "SELECT {} FROM {} {} {}".format(
                 select_query,
@@ -72,12 +67,15 @@ class Query(object):
                 joins if joins else '',
                 where if where else ''
             )
-
+        print query
         db_results = self.db.select(query, kwargs.get("params"))
         for result in db_results:
             results.append(
                 self.hydrate(result)[0]
             )
+        for field in self.fields:
+            if hasattr(field, "extra"):
+                results = field.extra(self, results)
         return results
 
     @property
@@ -96,12 +94,6 @@ class Query(object):
             hydrated, r = field.hydrate(r)
             obj.update(hydrated)
         return self.database_object(obj), r
-
-        # return self.database_object(
-        #     self.fields,
-        #     **dict(zip(
-        #         [field.name for field in self.fields],
-        #         result)))
 
 
 class Projection(Query):
@@ -139,7 +131,7 @@ class Projection(Query):
 multitable must define a get_table method""".format(self))
 
     @property
-    def get_fields(self):
+    def get_table_fields(self):
         result = []
         if not hasattr(self, "schema"):
             schema = "public"
@@ -159,7 +151,7 @@ multitable must define a get_table method""".format(self))
     def insert(self, values, returning=None):
         if not values:
             raise ValueError("values parameter cannot be an empty dict")
-        db_fields = self.get_fields
+        db_fields = self.get_table_fields
         errors = []
         for fields in db_fields:
             if not values.get(fields["column_name"]) and \
