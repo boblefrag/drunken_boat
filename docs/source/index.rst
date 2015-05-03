@@ -1,16 +1,16 @@
+.. include:: ../../README.rst
+
 Contents:
+=========
 
 .. toctree::
-   :maxdepth: 2
-   :titlesonly:
 
    install
+   orm
    tutorial
    about/index
    contributing
-   orm
 
-.. include:: ../../README.rst
 
 
 Indices and tables
