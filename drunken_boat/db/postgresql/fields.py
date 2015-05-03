@@ -51,7 +51,7 @@ class ReverseForeign(Related):
     make_join = False
 
     def get_select(self):
-        return
+        return self.join[0]
 
     def extra(self, projection, results):
         """The extra method will make a request to get all the related
@@ -63,8 +63,14 @@ class ReverseForeign(Related):
         """
         lookup = [getattr(result, self.join[0]) for result in results]
         reverse_projection = self.projection(projection.db)
+        reverse_field = Field(db_name=self.join[1],
+                              table=reverse_projection.Meta.table)
+        reverse_field.name = reverse_field.db_name
+        reverse_projection.fields.append(
+            reverse_field
+        )
         reverses = reverse_projection.select(
-            where="WHERE {}=ANY(%s)".format(self.join[1]),
+            where="{}=ANY(%s)".format(self.join[1]),
             params=[lookup])
         for result in results:
             setattr(
@@ -78,8 +84,9 @@ class ReverseForeign(Related):
         return results
 
     def hydrate(self, result):
-        if result:
-            return {}, result
+        hydrated = {self.join[0]: result[0]}
+        result = result[1:]
+        return hydrated, result
 
 
 class CharField(Field):

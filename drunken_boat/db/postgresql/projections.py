@@ -13,7 +13,7 @@ class DataBaseObject(object):
 class Query(object):
     def get_by_pk(self, pk, *args, **kwargs):
         pk_column = self.db.get_primary_key(self.Meta.table)
-        where = "WHERE {} = %s".format(pk_column)
+        where = "{} = %s".format(pk_column)
         kwargs["params"] = kwargs.get("params", [])
         kwargs["params"].append(pk)
         results = self.select(where=where, params=kwargs["params"])
@@ -65,9 +65,8 @@ class Query(object):
                 select_query,
                 table,
                 joins if joins else '',
-                where if where else ''
+                "WHERE {}".format(where) if where else ''
             )
-        print query
         db_results = self.db.select(query, kwargs.get("params"))
         for result in db_results:
             results.append(
