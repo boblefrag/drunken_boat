@@ -3,57 +3,9 @@ import pytest
 import datetime
 from drunken_boat.db.exceptions import NotFoundError
 from drunken_boat.db.postgresql.tests import drop_db, create_db, get_test_db
-from drunken_boat.db.postgresql.projections import Projection, DataBaseObject
-from drunken_boat.db.postgresql.fields import CharField, Timestamp, ForeignKey
+from drunken_boat.db.postgresql.tests import projections_fixtures
+from drunken_boat.db.postgresql.projections import DataBaseObject
 from drunken_boat.db.postgresql import DB
-
-
-class DataBaseObjectWithMeth(DataBaseObject):
-
-    def age_seconds(self):
-        return self.age.total_seconds()
-
-
-class TestProjection(Projection):
-    title = CharField()
-
-    class Meta:
-        table = "dummy"
-
-
-class TestRaiseProjection(Projection):
-    title = CharField()
-
-
-class TestProjectionWithVirtual(Projection):
-    title = CharField()
-    age = Timestamp(db_name="age(birthdate)", virtual=True)
-
-    class Meta:
-        table = "dummy"
-        database_object = DataBaseObjectWithMeth
-
-
-class TestRaiseProjectionWithNoGetTable(Projection):
-    title = CharField(table="dummy")
-
-
-class AuthorProjection(Projection):
-    name = CharField()
-
-    class Meta:
-        table = "author"
-
-
-class BookProjection(Projection):
-    name = CharField()
-    author = ForeignKey(
-        join=["author_id", "id"],
-        projection=AuthorProjection
-    )
-
-    class Meta:
-        table = "book"
 
 
 @pytest.fixture(scope="module")
@@ -106,7 +58,7 @@ def test_db(prepare_test):
 
 
 def test_projection_select(prepare_test):
-    projection = TestProjection(DB(database="dummy_db"))
+    projection = projections_fixtures.TestProjection(DB(database="dummy_db"))
     results = projection.select()
     assert isinstance(results[0], DataBaseObject)
     assert results[0].title == "hello"
@@ -114,49 +66,51 @@ def test_projection_select(prepare_test):
 
 
 def test_projection_get_by_py(prepare_test):
-    projection = TestProjection(DB(database="dummy_db"))
+    projection = projections_fixtures.TestProjection(DB(database="dummy_db"))
     assert isinstance(projection.get_by_pk(1), DataBaseObject)
     assert isinstance(projection.get_by_pk(2), DataBaseObject)
 
 
 def test_raising_projection(prepare_test):
-    pytest.raises(ValueError, TestRaiseProjection, get_test_db())
-    projection = TestRaiseProjectionWithNoGetTable(get_test_db())
+    pytest.raises(ValueError,
+                  projections_fixtures.TestRaiseProjection, get_test_db())
+    projection = projections_fixtures.TestRaiseProjectionWithNoGetTable(
+        get_test_db())
     pytest.raises(ValueError, projection.select)
 
 
 def test_projection_query(prepare_test):
-    projection = TestProjection(get_test_db())
+    projection = projections_fixtures.TestProjection(get_test_db())
     query = "select title from dummy"
     assert isinstance(projection.select(query=query)[0], DataBaseObject)
 
 
 def test_projection_results_empty(prepare_test):
-    projection = TestProjection(get_test_db())
+    projection = projections_fixtures.TestProjection(get_test_db())
     query = "select title from dummy where introduction = %s"
     params = ["nothing"]
     assert len(projection.select(query=query, params=params)) == 0
 
 
 def test_projection_get_by_py_raise(prepare_test):
-    projection = TestProjection(get_test_db())
+    projection = projections_fixtures.TestProjection(get_test_db())
     pytest.raises(NotFoundError, projection.get_by_pk, 3)
 
 
 def test_projection_with_vitual(prepare_test):
-    projection = TestProjectionWithVirtual(get_test_db())
+    projection = projections_fixtures.TestProjectionWithVirtual(get_test_db())
     results = projection.select()
     assert isinstance(results[0].age, datetime.timedelta)
 
 
 def test_projection_method(prepare_test):
-    projection = TestProjectionWithVirtual(get_test_db())
+    projection = projections_fixtures.TestProjectionWithVirtual(get_test_db())
     results = projection.select()
     assert isinstance(results[0].age_seconds(), float)
 
 
 def test_projection_inserting(prepare_test):
-    projection = TestProjectionWithVirtual(get_test_db())
+    projection = projections_fixtures.TestProjectionWithVirtual(get_test_db())
     pytest.raises(ValueError, projection.insert, {})
     pytest.raises(ValueError, projection.insert, {"title": "hello"})
 
@@ -185,15 +139,24 @@ def test_projection_inserting(prepare_test):
          "introduction": "a meaningfull introduction"},
         returning="self"
     )
-    assert isinstance(doc, DataBaseObjectWithMeth)
+    assert isinstance(doc, projections_fixtures.DataBaseObjectWithMeth)
 
 
 def test_pojection_foreign(prepare_test):
-    projection_author = AuthorProjection(get_test_db())
+    projection_author = projections_fixtures.AuthorProjection(get_test_db())
     projection_author.insert(
         {"name": "author"})
-    projection = BookProjection(get_test_db())
+    projection = projections_fixtures.BookProjection(get_test_db())
     projection.insert({"name": "book", "author_id": 1})
     assert isinstance(projection.select(), list)
     assert isinstance(projection.select()[0], DataBaseObject)
     assert isinstance(projection.select()[0].author, DataBaseObject)
+
+
+def test_projection_reverse(prepare_test):
+    projection_author = projections_fixtures.AuthorProjectionReverse(
+        get_test_db())
+    assert isinstance(projection_author.select()[0].books, list)
+    author = projection_author.select()[0]
+    book = projection_author.select()[0].books[0]
+    assert author.id == book.author_id
