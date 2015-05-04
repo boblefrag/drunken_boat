@@ -1,5 +1,6 @@
 import os
 from drunken_boat.db.postgresql.fields import Field
+from drunken_boat.db.postgresql.query import Query
 from drunken_boat.db.exceptions import NotFoundError
 
 
@@ -10,7 +11,7 @@ class DataBaseObject(object):
             setattr(self, k, v)
 
 
-class Query(object):
+class ProjectionQuery(object):
     def get_by_pk(self, pk, *args, **kwargs):
         pk_column = self.db.get_primary_key(self.Meta.table)
         where = "{} = %s".format(pk_column)
@@ -44,8 +45,7 @@ class Query(object):
                      for f in field.projection(self.db).fields])
         return " ".join(joins)
 
-    def select(self, *args, **kwargs):
-        results = []
+    def select(self, lazy=False, *args, **kwargs):
         if kwargs.get("query"):
             # if a query is already given, just use this one
             query = kwargs["query"]
@@ -67,15 +67,12 @@ class Query(object):
                 joins if joins else '',
                 "WHERE {}".format(where) if where else ''
             )
-        db_results = self.db.select(query, kwargs.get("params"))
-        for result in db_results:
-            results.append(
-                self.hydrate(result)[0]
-            )
-        for field in self.fields:
-            if hasattr(field, "extra"):
-                results = field.extra(self, results)
-        return results
+
+        Q = Query(self, query, params=kwargs.pop("params", None))
+        if lazy:
+            return Q
+        else:
+            return Q.execute()
 
     @property
     def database_object(self):
@@ -95,7 +92,7 @@ class Query(object):
         return self.database_object(obj), r
 
 
-class Projection(Query):
+class Projection(ProjectionQuery):
 
     def __new__(cls, *args, **kwargs):
         cls.fields = []
