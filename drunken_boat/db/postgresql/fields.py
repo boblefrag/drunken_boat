@@ -1,3 +1,6 @@
+from drunken_boat.db.postgresql.query import Where
+
+
 class Field(object):
     virtual = False
 
@@ -61,6 +64,8 @@ class ReverseForeign(Related):
         then, when self.hydrate will be called, those objects will be
         added to the object representation of the main Projection.
         """
+        if len(results) == 0:
+            return []
         lookup = [getattr(result, self.join[0]) for result in results]
         reverse_projection = self.projection(projection.db)
         reverse_field = Field(db_name=self.join[1],
@@ -71,6 +76,8 @@ class ReverseForeign(Related):
         )
         where_clause = "{}=ANY(%s)".format(self.join[1])
         if where:
+            if isinstance(where, Where):
+                where = where()
             where_clause = "{} AND ({})".format(where_clause, where)
         params_clause = [[lookup]]
         if params:
