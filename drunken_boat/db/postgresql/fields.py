@@ -53,7 +53,7 @@ class ReverseForeign(Related):
     def get_select(self):
         return self.join[0]
 
-    def extra(self, projection, results):
+    def extra(self, projection, results, where=None, params=None):
         """The extra method will make a request to get all the related
         object pointed by the ReverseForeign storing them in
         self.related_object.
@@ -69,9 +69,16 @@ class ReverseForeign(Related):
         reverse_projection.fields.append(
             reverse_field
         )
+        where_clause = "{}=ANY(%s)".format(self.join[1])
+        if where:
+            where_clause = "{} AND ({})".format(where_clause, where)
+        params_clause = [[lookup]]
+        if params:
+            [params_clause.append(param) for param in params]
+
         reverses = reverse_projection.select(
-            where="{}=ANY(%s)".format(self.join[1]),
-            params=[lookup])
+            where=where_clause,
+            params=params_clause)
         for result in results:
             setattr(
                 result,
