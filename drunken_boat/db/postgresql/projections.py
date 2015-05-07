@@ -12,6 +12,7 @@ class DataBaseObject(object):
 
 
 class ProjectionQuery(object):
+
     def get_by_pk(self, pk, *args, **kwargs):
         pk_column = self.db.get_primary_key(self.Meta.table)
         where = "{} = %s".format(pk_column)
@@ -67,8 +68,9 @@ class ProjectionQuery(object):
                 joins if joins else '',
                 "WHERE {}".format(where) if where else ''
             )
-
-        Q = Query(self, query, params=kwargs.pop("params", None))
+        Q = Query(self, query,
+                  params=kwargs.pop("params", None),
+                  **kwargs.get("related", {}))
         if lazy:
             return Q
         else:
