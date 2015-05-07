@@ -151,3 +151,21 @@ second part of ReverseForeign.join (`author_id` in the example).
 This is the reason why we can get `author.id` even if `id` is not on the
 `AuthorProjectionWithPost.fields` and `post.author_id` even if
 `author_id` is not on `PostProjectionRelated.fields`
+
+Filter reverse foreignkey
+-------------------------
+
+Sometimes getting the related objects is not enought and you will need
+to filter the related objects.
+
+To do so, `drunken_boat` offer a simple API. You only need to give to
+the `select` method a related argument to hold every related fields
+where and params::
+
+  >>> projection = author_projection_with_post.select(
+  ...     related={'posts':
+  ...         'where': 'title=%s',
+  ...         'params': ('a title')})
+  >>> print post.__dict__ for post in projection[1].posts]
+  [{"title": "a title", "introduction": "an introduction",
+  "author_id": 2}]

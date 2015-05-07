@@ -8,7 +8,6 @@ class Query(object):
 
     def execute(self):
         results = []
-        print self.query, self.params
         db_results = self.projection.db.select(self.query, self.params)
         for result in db_results:
             results.append(
@@ -18,7 +17,6 @@ class Query(object):
             if hasattr(field, "extra"):
                 where, params = None, None
                 if self.kwargs.get(field.name):
-                    print self.kwargs.get(field.name)
                     where = self.kwargs[field.name].get("where")
                     params = self.kwargs[field.name].get("params")
                 results = field.extra(self.projection, results,
