@@ -1,11 +1,13 @@
 CHANGELOG
 =========
 
-0.0.4 (unreleased)
+0.0.4 (2015-05-08)
 ------------------
 
-- Nothing changed yet.
-
+- Implement join
+- Implement reverse foreignkey
+- Implement reverse related filters
+- Implement the where class
 
 0.0.3 (2015-05-01)
 ------------------
