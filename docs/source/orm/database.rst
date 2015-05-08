@@ -149,6 +149,36 @@ parameter will be define when calling the select method of your
   >>> projection.select(where=where, params=(1,))
 
 
+Multiple Where
+______________
+
+It's also possible to use multiple where in a single select using
+biwise operations. AND, OR and NOT are supported:
+
+AND::
+
+  >>> where = Where("id", "=", "%s") & Where("title", "=", "%s")
+
+OR::
+
+  >>> where = Where("id", "=", "%s") | Where("title", "=", "%s")
+
+NOT::
+
+  >>> where = Where("id", "=", "%s") & ~Where("title", "=", "%s")
+
+NOT can be used as is to make exclude clause::
+
+  >>> where = ~Where("title", "=", "%s")
+
+You can also define priorities with parenthesis::
+
+  >>> where = Where("id", "=", "%s") | (Where("title", "=", "%s") & Where("intro", "=", "%s"))
+
+this will be rendered as::
+
+  id = %s OR (title = %s AND intro = %s)
+
 Insert
 ------
 

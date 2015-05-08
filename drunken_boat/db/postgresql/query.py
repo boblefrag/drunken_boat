@@ -44,9 +44,38 @@ class Where(object):
         self.clause = clause
         self.operator = operator
         self.value = value
+        self.clause_list = [self.render()]
 
-    def __call__(self):
+    def render(self):
         return "{clause} {operator} {value}".format(
             clause=self.clause,
             operator=self.operator,
             value=self.value)
+
+    def __call__(self):
+        return "({})".format(" ".join(self.clause_list))
+
+    def __and__(self, obj):
+        if not isinstance(obj, Where):
+            raise TypeError("cannot concatenate {} and {}".format(
+                obj.__class__,
+                self.__class__
+            ))
+        else:
+            self.clause_list += ["AND", obj()]
+        return self
+
+    def __or__(self, obj):
+        if not isinstance(obj, Where):
+            raise TypeError(
+                "unsupported operand type(s) for |: {} and {}".format(
+                    obj.__class__,
+                    self.__class__
+                ))
+        else:
+            self.clause_list += ["OR", obj()]
+        return self
+
+    def __invert__(self):
+        self.clause_list = ["NOT", self()]
+        return self
