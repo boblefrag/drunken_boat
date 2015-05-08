@@ -25,9 +25,10 @@ class ProjectionQuery(object):
             ))
         return results[0]
 
-    def get_joins(self, *args, **kwargs):
+    def get_joins(self, table, *args, **kwargs):
         joins = []
         join_id = 0
+        self_table = table
         for field in self.fields:
 
             if hasattr(field, "join") and field.make_join:
@@ -35,7 +36,9 @@ class ProjectionQuery(object):
                 join_alias = "t{}".format(join_id)
                 joins.append(
                     """INNER JOIN {table} {join_alias} ON
-                    {from_field}={join_alias}.{to_field}""".format(
+                    {self_table}.{from_field}={join_alias}.{to_field}
+                    """.format(
+                        self_table=self_table,
                         table=field.projection.Meta.table,
                         from_field=field.join[0],
                         to_field=field.join[1],
@@ -58,7 +61,7 @@ class ProjectionQuery(object):
             if not where:
                 where = self.get_where(*args, **kwargs)
             table = self.get_table(*args, **kwargs)
-            joins = self.get_joins(*args, **kwargs)
+            joins = self.get_joins(table, *args, **kwargs)
             fields = []
             for field in self.fields:
                 select = field.get_select()

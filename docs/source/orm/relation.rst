@@ -169,3 +169,97 @@ where and params::
   >>> print post.__dict__ for post in projection[1].posts]
   [{"title": "a title", "introduction": "an introduction",
   "author_id": 2}]
+
+Many To Many
+------------
+
+With `ReverseForeign` and `ForeignKey` you can already implement Many
+to many relations. To do so, let say you have the following tables in
+your database::
+
+  CREATE TABLE product (
+    id serial PRIMARY KEY
+  , product    text NOT NULL
+  , price      numeric NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE bill (
+    id  serial PRIMARY KEY
+  , bill     text NOT NULL
+  , billdate date NOT NULL DEFAULT now()::date
+  );
+
+  CREATE TABLE bill_product (
+    bill_id    int REFERENCES bill (bill_id) ON UPDATE CASCADE ON DELETE CASCADE
+  , product_id int REFERENCES product (product_id) ON UPDATE CASCADE
+  , amount     numeric NOT NULL DEFAULT 1
+  , CONSTRAINT bill_product_pkey PRIMARY KEY (bill_id, product_id)
+  );
+
+You can then create the following projections::
+
+  class Product(Projection):
+      product = CharField()
+      price = Integer()
+
+      class Meta:
+          table = "product"
+
+  product_projection = Product(DB(**DATABASE))
+
+
+  class BillProduct(Projection):
+      product = ForeignKey(join=["product_id", "id"],
+                           projection=Product)
+      class Meta:
+          table = "bill_product"
+
+  productbill_projection = BillProduct(DB(**DATABASE))
+
+
+  class Bill(Projection):
+      bill = CharField()
+      billdate = Timestamp()
+      products = ReverseForeign(join=["id", "bill_id"],
+                                projection=BillProduct)
+      class Meta:
+          table = "bill"
+
+  bill_projection = Bill(DB(**DATABASE))
+
+With a select on `bill_projection` you will retreive all the
+`BillProduct` matching your select. `BillProduct` will then retreive
+the corresponding `Product`. This will give you the following results::
+
+  [
+    {"bill": "<text>",
+     "billdate": <a date>,
+     "products": [
+       {"product":
+         {"product": <text>, "price": <a price>},
+       {"product":
+         {"product": <text>, "price": <a price>},
+       ...
+     ]
+   ...
+  ]
+
+create a bill with product you need to create the corresponding
+bill_product record. This can be done using :ref:`returning`::
+
+  import datetime
+  bill = bill_projection.insert(
+      {"bill": "a bill",
+       "billdate": datetime.datetime.now()
+      }, returning="id")
+
+  # because we use returning, bill is the bill.id of the object just
+  # saved
+
+  product = product_projection.insert(
+      {"product": "screwdriver",
+       "price": 10},
+       returning="id"
+      )
+
+  productbill_projection.insert({"bill_id": bill, "product_id": product})
