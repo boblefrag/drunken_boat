@@ -227,6 +227,7 @@ You can check that your record is saved in the database::
   >>> example_projection.select()
   ... [<projections.DataBaseObject at 0x7f2ac0447c10>]
 
+.. _returning:
 
 Returning
 _________
