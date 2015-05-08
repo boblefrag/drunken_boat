@@ -22,7 +22,7 @@ less and eventualy agnostic
 A simple Hello World
 ____________________
 
-first, install `drunken-boat` see http://drunken-boat.readthedocs.org/en/stable/install.html. Once drunken_boat
+first, install `drunken-boat` see http://drunken_boat.readthedocs.org/en/stable/install.html. Once drunken_boat
 installed you can boostrap your first application with::
 
      drunken_run.py bootstrap example_blog
@@ -93,4 +93,4 @@ Every request on "/" will return a "Hello World!" a lot more can be
 done in `View` check the documentation on how to manage much more with
 `MiddleWare`,  `Projection` for database access and else.
 
-See http://drunken-boat.readthedocs.org/ for full documentation
+See http://drunken_boat.readthedocs.org/ for full documentation
