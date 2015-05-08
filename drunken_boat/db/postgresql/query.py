@@ -22,3 +22,31 @@ class Query(object):
                 results = field.extra(self.projection, results,
                                       where=where, params=params)
         return results
+
+
+class Where(object):
+
+    def __init__(self, clause, operator, value):
+        """
+        Where object let you write in an easy, clear and maintanable
+        manner WHERE clause to add to your queries.
+        Where objects will be roughly executed as:
+        WHERE {clause}{operator}{value}
+        for example Where('id', '=', %s) will be executed as :
+
+        WHERE id = %s
+
+        you can also express things more fun like:
+        Where('id', '=', ANY(%s)) that will be rendered as:
+
+        WHERE id = ANY(%s)
+        """
+        self.clause = clause
+        self.operator = operator
+        self.value = value
+
+    def __call__(self):
+        return "{clause} {operator} {value}".format(
+            clause=self.clause,
+            operator=self.operator,
+            value=self.value)
