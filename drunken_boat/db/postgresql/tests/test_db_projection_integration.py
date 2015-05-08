@@ -91,6 +91,58 @@ def test_projection_query(prepare_test):
     assert isinstance(projection.select(query=query)[0], DataBaseObject)
 
 
+def test_projection_query_where(prepare_test):
+    projection = projections_fixtures.TestProjection(get_test_db())
+    where = Where("title", "=", "%s")
+    projection = projection.select(where=where, params=("hello",))
+    assert projection[0].title == "hello"
+
+
+def test_projection_query_where_or(prepare_test):
+    projection = projections_fixtures.TestProjection(get_test_db())
+    where = Where("title", "=", "%s") | Where("id", "=", "%s")
+    results = projection.select(where=where, params=("hello", 2))
+    assert results[0].title == "hello"
+    assert results[1].title == "goodbye"
+    results = projection.select(where=where, params=("hello", 1))
+    assert len(results) == 1
+
+
+def test_projection_query_where_and(prepare_test):
+    projection = projections_fixtures.TestProjection(get_test_db())
+    where = Where("title", "=", "%s") & Where("id", "=", "%s")
+    results = projection.select(where=where, params=("hello", 2))
+    assert len(results) == 0
+    results = projection.select(where=where, params=("hello", 1))
+    assert len(results) == 1
+
+
+def test_projection_query_where_nor(prepare_test):
+    projection = projections_fixtures.TestProjection(get_test_db())
+    where = Where("title", "=", "%s") & ~(
+        Where("id", "=", "%s") | Where("title", "=", "%s"))
+    results = projection.select(where=where, params=("hello", 1, "goodbye"))
+    assert len(results) == 0
+    results = projection.select(where=where, params=("goodbye", 1, "hello"))
+    assert len(results) == 1
+
+
+def test_projection_query_where_nand(prepare_test):
+    projection = projections_fixtures.TestProjection(get_test_db())
+    where = Where("title", "=", "%s") & ~(
+        Where("id", "=", "%s") & Where("title", "=", "%s"))
+    results = projection.select(where=where, params=("goodbye", 2, "goodbye"))
+    assert len(results) == 0
+    results = projection.select(where=where, params=("hello", 2, "goodbye"))
+    assert len(results) == 1
+
+
+def test_projection_query_where_raise(prepare_test):
+    where = Where("title", "=", "%s")
+    pytest.raises(TypeError, where.__and__, "a string")
+    pytest.raises(TypeError, where.__or__, "a string")
+
+
 def test_projection_results_empty(prepare_test):
     projection = projections_fixtures.TestProjection(get_test_db())
     query = "select title from dummy where introduction = %s"
@@ -148,7 +200,7 @@ def test_projection_inserting(prepare_test):
     assert isinstance(doc, projections_fixtures.DataBaseObjectWithMeth)
 
 
-def test_pojection_foreign(prepare_test):
+def test_projection_foreign(prepare_test):
     projection_author = projections_fixtures.AuthorProjection(get_test_db())
     projection_author.insert(
         {"name": "author"})
@@ -184,10 +236,17 @@ def test_projection_reverse_with_params(prepare_test):
         related={"books": {"where": "name=%s OR name=%s",
                            "params": ("a name", "a title")}})[0].books
     assert len(books) == 2
+
+
+def test_projection_reverse_with_where_object(prepare_test):
+
+    projection_author = projections_fixtures.AuthorProjectionReverse(
+        get_test_db())
     books = projection_author.select(
         related={"books": {"where": Where("name", "=", "%s"),
                            "params": ("a name",)}})[0].books
     assert len(books) == 1
+
     authors = projection_author.select(
         where=Where("id", "=", "%s"),
         params=(24,),
