@@ -114,6 +114,41 @@ objects, you can attach any method you want on it. For example::
   '13850 days since 1977'
 
 
+Where
+-----
+
+One thing you will surely do very often is to use `Projection` with
+WHERE clause. Where clause are defined with 2 sides. First side is the
+clause and the comparison operator, the other side is the parameter.
+
+For example, in the statement:
+
+WHERE id > 4;
+
+id is the clause, > is the comparison operator, and 4 is the parameter.
+
+The first an easier way to make a query with a WHERE clause is simply
+adding where and parameter to the select statement::
+
+  >>> projection.select(where='id=%s', params=(1,))
+
+If it's perfectly ok to do so, but sometimes you will need to store a
+WHERE clause to use it in many places in your code. For this the Where
+object is here to help you.
+
+A where object take a clause, an operator and a value::
+
+  from drunken_boat.db.postgresql.query import Where
+  where = Where("id", "=", "%s")
+
+As you can see a Where object is very similar to the select
+version. The difference is that you do not define a parameter yet. The
+parameter will be define when calling the select method of your
+`Projection`::
+
+  >>> projection.select(where=where, params=(1,))
+
+
 Insert
 ------
 
