@@ -1,6 +1,6 @@
 import os
 from drunken_boat.db.postgresql.fields import Field
-from drunken_boat.db.postgresql.query import Query
+from drunken_boat.db.postgresql.query import Query, Where
 from drunken_boat.db.exceptions import NotFoundError
 
 
@@ -52,6 +52,9 @@ class ProjectionQuery(object):
             query = kwargs["query"]
         else:
             where = kwargs.get("where")
+
+            if isinstance(where, Where):
+                where = where()
             if not where:
                 where = self.get_where(*args, **kwargs)
             table = self.get_table(*args, **kwargs)

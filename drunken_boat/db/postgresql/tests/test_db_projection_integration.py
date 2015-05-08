@@ -5,7 +5,7 @@ from drunken_boat.db.exceptions import NotFoundError
 from drunken_boat.db.postgresql.tests import drop_db, create_db, get_test_db
 from drunken_boat.db.postgresql.tests import projections_fixtures
 from drunken_boat.db.postgresql.projections import DataBaseObject
-from drunken_boat.db.postgresql.query import Query
+from drunken_boat.db.postgresql.query import Query, Where
 from drunken_boat.db.postgresql import DB
 
 
@@ -66,6 +66,9 @@ def test_projection_select(prepare_test):
     assert results[1].title == "goodbye"
     results = projection.select(lazy=True)
     assert isinstance(results, Query)
+    where = Where("title", "=", "%s")
+    results = projection.select(where=where, params=("hello",))
+    assert results[0].title == "hello"
 
 
 def test_projection_get_by_py(prepare_test):
@@ -181,3 +184,13 @@ def test_projection_reverse_with_params(prepare_test):
         related={"books": {"where": "name=%s OR name=%s",
                            "params": ("a name", "a title")}})[0].books
     assert len(books) == 2
+    books = projection_author.select(
+        related={"books": {"where": Where("name", "=", "%s"),
+                           "params": ("a name",)}})[0].books
+    assert len(books) == 1
+    authors = projection_author.select(
+        where=Where("id", "=", "%s"),
+        params=(24,),
+        related={"books": {"where": Where("name", "=", "%s"),
+                           "params": ("nothin",)}})
+    assert len(authors) == 0
