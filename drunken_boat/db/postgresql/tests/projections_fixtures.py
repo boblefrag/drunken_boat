@@ -58,6 +58,18 @@ class BookProjectionReverse(Projection):
 
 
 class AuthorProjectionReverse(Projection):
+    name = CharField()
+    books = ReverseForeign(
+        join=["id", "author_id"],
+        projection=BookProjectionReverse
+    )
+
+    class Meta:
+        table = "author"
+
+
+class AuthorProjectionReverseEm(Projection):
+
     books = ReverseForeign(
         join=["id", "author_id"],
         projection=BookProjectionReverse

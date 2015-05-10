@@ -1,6 +1,7 @@
 import os
-from drunken_boat.db.postgresql.fields import Field
+from drunken_boat.db.postgresql.fields import Field, ReverseForeign
 from drunken_boat.db.postgresql.query import Query, Where
+from drunken_boat.db.postgresql import field_is_nullable
 from drunken_boat.db.exceptions import NotFoundError
 
 
@@ -49,31 +50,37 @@ class ProjectionQuery(object):
                      for f in field.projection(self.db).fields])
         return " ".join(joins)
 
+    def get_query_from(self, *args, **kwargs):
+        where = kwargs.get("where")
+        if isinstance(where, Where):
+                where = where()
+        if not where:
+            where = self.get_where(*args, **kwargs)
+        table = self.get_table(*args, **kwargs)
+        joins = self.get_joins(table, *args, **kwargs)
+        return "{} {} {}".format(
+            table,
+            joins if joins else '',
+            "WHERE {}".format(where) if where else ''
+        )
+
     def select(self, lazy=False, *args, **kwargs):
         if kwargs.get("query"):
             # if a query is already given, just use this one
             query = kwargs["query"]
         else:
-            where = kwargs.get("where")
-
-            if isinstance(where, Where):
-                where = where()
-            if not where:
-                where = self.get_where(*args, **kwargs)
-            table = self.get_table(*args, **kwargs)
-            joins = self.get_joins(table, *args, **kwargs)
+            query_from = self.get_query_from(self, *args, **kwargs)
             fields = []
             for field in self.fields:
                 select = field.get_select()
                 if select:
                     fields.append(select)
             select_query = ", ".join(fields)
-            query = "SELECT {} FROM {} {} {}".format(
+            query = "SELECT {} FROM {}".format(
                 select_query,
-                table,
-                joins if joins else '',
-                "WHERE {}".format(where) if where else ''
+                query_from
             )
+
         Q = Query(self, query,
                   params=kwargs.pop("params", None),
                   **kwargs.get("related", {}))
@@ -91,10 +98,12 @@ class ProjectionQuery(object):
             database_object = self.Meta.database_object
         return database_object
 
-    def hydrate(self, result):
+    def hydrate(self, result, insert_or_update=False):
         r = result
         obj = {}
         for field in self.fields:
+            if insert_or_update and isinstance(field, ReverseForeign):
+                continue
             hydrated, r = field.hydrate(r)
             obj.update(hydrated)
         return self.database_object(obj), r
@@ -127,6 +136,23 @@ class Projection(ProjectionQuery):
     def get_where(self, *args, **kwargs):
             pass
 
+    def check_constrains(self, values):
+        """
+        For each field on the table check if a value is provided. If no
+        value is provided, ensure the field is nullable or a default
+        value is provided.
+        """
+        errors = []
+        for field in self.get_table_fields:
+            if not values.get(
+                    field["column_name"]) and not field_is_nullable(field):
+                errors.append("{} of type {} is required".format(
+                    field["column_name"],
+                    field["data_type"]
+                ))
+        if len(errors) != 0:
+            raise ValueError("\n".join(errors))
+
     def get_table(self, *args, **kwargs):
         if hasattr(self, "Meta"):
             if hasattr(self.Meta, "table"):
@@ -136,6 +162,11 @@ multitable must define a get_table method""".format(self))
 
     @property
     def get_table_fields(self):
+        """
+        Introspect the table to get all the fields of the table and
+        retreive column_name, data_type, is_nullable and
+        column_default.
+        """
         result = []
         if not hasattr(self, "schema"):
             schema = "public"
@@ -152,35 +183,42 @@ multitable must define a get_table method""".format(self))
             result.append(dict(zip(fields, elem)))
         return result
 
+    def make_returning(self, sql_template, returning=None):
+        if returning:
+            returning_fields = []
+            if returning == "self":
+                returning_fields = [f.db_name for f in self.fields if
+                                    not isinstance(f, ReverseForeign)]
+            else:
+                returning_fields = [returning]
+
+            if not len(returning_fields) == 0:
+                sql_template += "returning {}".format(
+                    ",".join(returning_fields))
+            else:
+                returning = False
+        return sql_template, returning
+
     def insert(self, values, returning=None):
+        """
+        Insert a new row into the table checking for constraints.  If
+        returning is set, return the corresponding column(s).  If the
+        special "self" is given to returning, return the
+        DatabaseObject used by this Projection
+        """
         if not values:
             raise ValueError("values parameter cannot be an empty dict")
-        db_fields = self.get_table_fields
-        errors = []
-        for fields in db_fields:
-            if not values.get(fields["column_name"]) and \
-               fields["is_nullable"] == "NO" and \
-               fields["column_default"] is None:
-                errors.append("{} of type {} is required".format(
-                    fields["column_name"],
-                    fields["data_type"]
-                ))
-        if len(errors) != 0:
-            raise ValueError("\n".join(errors))
+
+        self.check_constrains(values)
         keys = []
         vals = []
-
         for k, v in values.items():
             keys.append(k)
             vals.append(v)
 
         sql_template = "insert into {} ({}) VALUES ({})"
-        if returning:
-            if returning == "self":
-                sql_template += "returning {}".format(
-                    ", ".join([f.db_name for f in self.fields]))
-            else:
-                sql_template += "returning {}".format(returning)
+        sql_template, returning = self.make_returning(sql_template, returning)
+
         sql = sql_template.format(
             self.Meta.table,
             ", ".join(tuple(keys)),
@@ -188,6 +226,7 @@ multitable must define a get_table method""".format(self))
         )
         params = vals
         res = None
+
         with self.db.cursor() as cur:
             try:
                 cur.execute(sql, params)
@@ -198,5 +237,45 @@ multitable must define a get_table method""".format(self))
                 res = cur.fetchone()
         self.db.conn.commit()
         if returning == "self":
-            return self.hydrate(res)[0]
+            return self.hydrate(res, insert_or_update=True)[0]
         return res
+
+    def update(self, where, values, where_params, returning=None):
+        args = []
+        params = []
+        for k, v in values.items():
+            args.append(k)
+            params.append(v)
+        [params.append(p) for p in where_params]
+        if isinstance(where, Where):
+            where = where()
+        joins = self.get_joins(self.Meta.table)
+        sql_template = """
+        UPDATE {table} SET {args} {joins} WHERE {where}""".format(
+            table=self.Meta.table,
+            joins=joins if joins else '',
+            args=", ".join(["{}=%s".format(arg) for arg in args]),
+            where=where
+        )
+        sql_template, returning = self.make_returning(sql_template, returning)
+        res = None
+        with self.db.cursor() as cur:
+            try:
+                cur.execute(sql_template, params)
+            except Exception as e:
+                self.db.conn.rollback()
+                raise e
+            if returning:
+                res = cur.fetchall()
+        self.db.conn.commit()
+        results = []
+        if res:
+            if returning == "self":
+                for result in res:
+                    results.append(
+                        self.hydrate(result, insert_or_update=True)[0]
+                    )
+            else:
+                results = res
+
+        return results
