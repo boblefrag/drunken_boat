@@ -254,3 +254,34 @@ corresponding to the projection you actually use::
   datetime.timedelta(-1, 33857, 32595)
   >>> obj.birthday
   datetime.datetime(2015, 5, 1, 14, 35, 42, 967405)
+
+
+Update
+______
+
+Updating is similar o insert but the main difference is that when you
+commonly insert a single row, when you update a table, you can update
+a lot of rows in a single query on the database.
+
+To reflect this, the syntax of update is where clause, updated column
+and parameters for the where. For example, if you want to change all
+the example_projection object where data is "hello" to goodbye, you
+will write::
+
+  >>> example_projection.update("data=%s", {"data": "goodbye"}, ("hello",))
+
+obviously you can use a Where object to make things more readable:
+
+  >>> example_projection.update(Where("data", "=" "%s"),
+  ...    {"data": "goodbye"}, ("hello",))
+
+Last bt not least, like with insert you can ask the database for
+returning::
+
+  >>> example_projection.update(Where("data", "=" "%s"),
+  ...    {"data": "goodbye"}, ("hello",), returning="id, num, data")
+
+or
+
+  >>> example_projection.update(Where("data", "=" "%s"),
+  ...    {"data": "goodbye"}, ("hello",), returning="self")

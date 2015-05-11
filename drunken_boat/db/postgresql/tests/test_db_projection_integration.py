@@ -1,4 +1,4 @@
-from psycopg2 import DataError
+from psycopg2 import DataError, ProgrammingError
 import pytest
 import datetime
 from drunken_boat.db.exceptions import NotFoundError
@@ -200,6 +200,19 @@ def test_projection_inserting(prepare_test):
     assert isinstance(doc, projections_fixtures.DataBaseObjectWithMeth)
 
 
+def test_projection_update(prepare_test):
+    projection = projections_fixtures.TestProjectionWithVirtual(get_test_db())
+    pytest.raises(ProgrammingError, projection.update,
+                  Where("id", "=", "%s"),
+                  {"godawa": "Kaboom"},
+                  (4,))
+    p = projection.update(Where("id", "=", "%s"), {"title": "Kaboom"}, (4,))
+    assert p == []
+    p = projection.update(Where("id", "=", "%s"),
+                          {"title": "hello"}, (4,), returning="id")
+    assert p == [(4,)]
+
+
 def test_projection_foreign(prepare_test):
     projection_author = projections_fixtures.AuthorProjection(get_test_db())
     projection_author.insert(
@@ -218,6 +231,35 @@ def test_projection_reverse(prepare_test):
     author = projection_author.select()[0]
     book = projection_author.select()[0].books[0]
     assert author.id == book.author_id
+
+
+def test_projection_reverse_insert(prepare_test):
+    projection_author = projections_fixtures.AuthorProjectionReverse(
+        get_test_db())
+    p = projection_author.insert({"name": "hello"}, returning="self")
+    assert p.name == "hello"
+    assert hasattr(p, "books")
+
+    projection_author_empty = projections_fixtures.AuthorProjectionReverseEm(
+        get_test_db())
+    p = projection_author_empty.insert({"name": "hello"}, returning="self")
+    assert isinstance(p, DataBaseObject)
+
+
+def test_projection_reverse_update(prepare_test):
+    projection_author = projections_fixtures.AuthorProjectionReverse(
+        get_test_db())
+    p = projection_author.update("name=%s", {"name": "champomy"}, ("hello",),
+                                 returning="self")[0]
+    assert p.name == "champomy"
+
+    projection_author_empty = projections_fixtures.AuthorProjectionReverseEm(
+        get_test_db())
+
+    p = projection_author_empty.update(
+        "name=%s", {"name": "hello"}, ("champomy",),
+        returning="self")
+    assert p[0].id
 
 
 def test_projection_reverse_with_params(prepare_test):
