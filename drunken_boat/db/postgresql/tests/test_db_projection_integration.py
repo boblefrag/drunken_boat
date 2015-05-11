@@ -2,54 +2,17 @@ from psycopg2 import DataError, ProgrammingError
 import pytest
 import datetime
 from drunken_boat.db.exceptions import NotFoundError
-from drunken_boat.db.postgresql.tests import drop_db, create_db, get_test_db
+
 from drunken_boat.db.postgresql.tests import projections_fixtures
 from drunken_boat.db.postgresql.projections import DataBaseObject
 from drunken_boat.db.postgresql.query import Query, Where
 from drunken_boat.db.postgresql import DB
+from drunken_boat.db.postgresql.tests import get_test_db
 
 
 @pytest.fixture(scope="module")
 def prepare_test():
-    drop_db()
-    create_db()
-    db = get_test_db()
-    db.create_table("author",
-                    id="serial PRIMARY KEY",
-                    name="varchar(10) NOT NULL")
-    db.conn.commit()
-    db.create_table("book",
-                    id="serial PRIMARY KEY",
-                    name="varchar(10) NOT NULL",
-                    author_id="integer NOT NULL")
-    db.conn.commit()
-    with db.cursor() as cur:
-        cur.execute(
-            "alter table book add foreign key(author_id) references author"
-        )
-    db.conn.commit()
-    db.create_table("dummy",
-                    id="serial PRIMARY KEY",
-                    title="character varying (10) NOT NULL",
-                    introduction="text NOT NULL",
-                    birthdate="timestamp")
-    db.conn.commit()
-    with db.cursor() as cur:
-        cur.execute("""INSERT INTO dummy (title,
-                                          introduction,
-                                          birthdate) VALUES (%s, %s, %s)""",
-                    ("hello",
-                     "This is an introduction",
-                     datetime.datetime(2000, 3, 14)))
-        cur.execute("""INSERT INTO dummy (title,
-                                        introduction,
-                                        birthdate) VALUES (%s, %s, %s)""",
-                    ("goodbye",
-                     "This is an a leaving",
-                     datetime.datetime(2010, 5, 25)))
-        db.conn.commit()
-
-    return db
+    return projections_fixtures.prepare_test()
 
 
 def test_db(prepare_test):
