@@ -10,9 +10,10 @@ class ModelObject(DataBaseObject):
         self.pk_column = projection.db.get_primary_key(projection.Meta.table)
         if self.pk_column not in [
                 field.db_name for field in self.projection.fields]:
-            self.projection.fields.append(
-                Field(db_name=self.pk_column)
-            )
+            pk = Field(db_name=self.pk_column,
+                       table=projection.Meta.table)
+            pk.name = pk.db_name
+            self.projection.fields.append(pk)
         if not kwargs:
             kwargs = {}
         super(ModelObject, self).__init__(kwargs)
