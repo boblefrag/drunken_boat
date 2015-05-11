@@ -1,5 +1,5 @@
 import os
-from drunken_boat.db.postgresql.fields import Field, ReverseForeign
+from drunken_boat.db.postgresql.fields import Field
 from drunken_boat.db.postgresql.query import Query, Where
 from drunken_boat.db.postgresql import field_is_nullable
 from drunken_boat.db.exceptions import NotFoundError
@@ -98,12 +98,10 @@ class ProjectionQuery(object):
             database_object = self.Meta.database_object
         return database_object
 
-    def hydrate(self, result, insert_or_update=False):
+    def hydrate(self, result):
         r = result
         obj = {}
         for field in self.fields:
-            if insert_or_update and isinstance(field, ReverseForeign):
-                continue
             hydrated, r = field.hydrate(r)
             obj.update(hydrated)
         return self.database_object(obj), r
@@ -187,19 +185,16 @@ multitable must define a get_table method""".format(self))
         if returning:
             returning_fields = []
             if returning == "self":
-                returning_fields = [f.db_name for f in self.fields if
-                                    not isinstance(f, ReverseForeign)]
+                returning_fields = [f.get_select() for f in self.fields]
             else:
                 returning_fields = [returning]
 
             if not len(returning_fields) == 0:
                 sql_template += "returning {}".format(
                     ",".join(returning_fields))
-            else:
-                returning = False
-        return sql_template, returning
+        return sql_template
 
-    def insert(self, values, returning=None):
+    def insert(self, values, returning=None, **kwargs):
         """
         Insert a new row into the table checking for constraints.  If
         returning is set, return the corresponding column(s).  If the
@@ -217,7 +212,7 @@ multitable must define a get_table method""".format(self))
             vals.append(v)
 
         sql_template = "insert into {} ({}) VALUES ({})"
-        sql_template, returning = self.make_returning(sql_template, returning)
+        sql_template = self.make_returning(sql_template, returning)
 
         sql = sql_template.format(
             self.Meta.table,
@@ -237,10 +232,14 @@ multitable must define a get_table method""".format(self))
                 res = cur.fetchone()
         self.db.conn.commit()
         if returning == "self":
-            return self.hydrate(res, insert_or_update=True)[0]
+            results = [self.hydrate(res)[0]]
+            for field in self.fields:
+                if hasattr(field, "extra"):
+                    results = field.extra(self, results)
+            return results[0]
         return res
 
-    def update(self, where, values, where_params, returning=None):
+    def update(self, where, values, where_params, returning=None, **kwargs):
         args = []
         params = []
         for k, v in values.items():
@@ -257,7 +256,7 @@ multitable must define a get_table method""".format(self))
             args=", ".join(["{}=%s".format(arg) for arg in args]),
             where=where
         )
-        sql_template, returning = self.make_returning(sql_template, returning)
+        sql_template = self.make_returning(sql_template, returning)
         res = None
         with self.db.cursor() as cur:
             try:
@@ -273,8 +272,11 @@ multitable must define a get_table method""".format(self))
             if returning == "self":
                 for result in res:
                     results.append(
-                        self.hydrate(result, insert_or_update=True)[0]
+                        self.hydrate(result)[0]
                     )
+                for field in self.fields:
+                    if hasattr(field, "extra"):
+                        results = field.extra(self, results)
             else:
                 results = res
 

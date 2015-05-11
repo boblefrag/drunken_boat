@@ -72,7 +72,7 @@ class AuthorProjectionReverseEm(Projection):
 
     books = ReverseForeign(
         join=["id", "author_id"],
-        projection=BookProjectionReverse
+        projection=BookProjection
     )
 
     class Meta:
