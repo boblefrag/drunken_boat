@@ -238,13 +238,12 @@ def test_projection_reverse_insert(prepare_test):
         get_test_db())
     p = projection_author.insert({"name": "hello"}, returning="self")
     assert p.name == "hello"
-    assert hasattr(p, "books") == False
+    assert hasattr(p, "books")
 
     projection_author_empty = projections_fixtures.AuthorProjectionReverseEm(
         get_test_db())
     p = projection_author_empty.insert({"name": "hello"}, returning="self")
-
-    assert p is None
+    assert isinstance(p, DataBaseObject)
 
 
 def test_projection_reverse_update(prepare_test):
@@ -260,7 +259,7 @@ def test_projection_reverse_update(prepare_test):
     p = projection_author_empty.update(
         "name=%s", {"name": "hello"}, ("champomy",),
         returning="self")
-    assert p == []
+    assert p[0].id
 
 
 def test_projection_reverse_with_params(prepare_test):
