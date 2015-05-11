@@ -2,6 +2,7 @@ import pytest
 from drunken_boat.db.postgresql.tests import get_test_db
 from drunken_boat.db.postgresql.tests import projections_fixtures
 from drunken_boat.db.postgresql.models import Model, ModelObject
+from drunken_boat.db.postgresql.projections import DataBaseObject
 
 
 @pytest.fixture(scope="module")
@@ -25,3 +26,4 @@ def test_model_init(prepare_test):
     assert o[0] == "hello"
     obj.title = "something"
     assert obj.update(returning="title")[0] == "something"
+    assert isinstance(obj.save(returning="self"), DataBaseObject)
