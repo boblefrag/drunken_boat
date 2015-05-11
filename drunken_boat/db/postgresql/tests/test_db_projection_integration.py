@@ -176,6 +176,28 @@ def test_projection_update(prepare_test):
     assert p == [(4,)]
 
 
+def test_projection_delete(prepare_test):
+    projection = projections_fixtures.TestProjectionWithVirtual(get_test_db())
+    projection.insert(
+        {"title": "dummy",
+         "introduction": "a meaningfull introduction"})
+    assert projection.delete("title=%s", ("dummy",)) == []
+    projection.insert(
+        {"title": "dummy",
+         "introduction": "a meaningfull introduction"})
+    assert projection.delete(Where("title", "=", "%s"), ("dummy",)) == []
+    pytest.raises(ProgrammingError,
+                  projection.delete,
+                  Where("name", "=", "%s"), ("Pouet",))
+    projection.insert(
+        {"title": "dummy",
+         "introduction": "a meaningfull introduction"})
+    p = projection.delete(Where("title", "=", "%s"),
+                          ("dummy",),
+                          returning="self")
+    assert isinstance(p[0], DataBaseObject)
+
+
 def test_projection_foreign(prepare_test):
     projection_author = projections_fixtures.AuthorProjection(get_test_db())
     projection_author.insert(
