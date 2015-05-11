@@ -194,7 +194,7 @@ multitable must define a get_table method""".format(self))
                     ",".join(returning_fields))
         return sql_template
 
-    def insert(self, values, returning=None, **kwargs):
+    def insert(self, values, returning=None):
         """
         Insert a new row into the table checking for constraints.  If
         returning is set, return the corresponding column(s).  If the
@@ -231,15 +231,11 @@ multitable must define a get_table method""".format(self))
             if returning:
                 res = cur.fetchone()
         self.db.conn.commit()
-        if returning == "self":
-            results = [self.hydrate(res)[0]]
-            for field in self.fields:
-                if hasattr(field, "extra"):
-                    results = field.extra(self, results)
+        results = self.return_results([res], returning)
+        if len(results) > 0:
             return results[0]
-        return res
 
-    def update(self, where, values, where_params, returning=None, **kwargs):
+    def update(self, where, values, where_params, returning=None):
         args = []
         params = []
         for k, v in values.items():
@@ -267,6 +263,29 @@ multitable must define a get_table method""".format(self))
             if returning:
                 res = cur.fetchall()
         self.db.conn.commit()
+        return self.return_results(res, returning)
+
+    def delete(self, where, params, returning=None):
+        if isinstance(where, Where):
+            where = where()
+        sql_template = """DELETE FROM {table} WHERE {where}""".format(
+            table=self.Meta.table,
+            where=where
+        )
+        sql_template = self.make_returning(sql_template, returning)
+        res = None
+        with self.db.cursor() as cur:
+            try:
+                cur.execute(sql_template, params)
+            except Exception as e:
+                self.db.conn.rollback()
+                raise e
+            if returning:
+                res = cur.fetchall()
+        self.db.conn.commit()
+        return self.return_results(res, returning)
+
+    def return_results(self, res, returning):
         results = []
         if res:
             if returning == "self":

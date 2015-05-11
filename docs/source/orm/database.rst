@@ -230,7 +230,7 @@ You can check that your record is saved in the database::
 .. _returning:
 
 Returning
-_________
+---------
 
 You can feel a bit disturbing to do not have a hint on what's the
 result of your insert. If you want to get results, you can use
@@ -257,7 +257,7 @@ corresponding to the projection you actually use::
 
 
 Update
-______
+------
 
 Updating is similar o insert but the main difference is that when you
 commonly insert a single row, when you update a table, you can update
@@ -285,3 +285,17 @@ or
 
   >>> example_projection.update(Where("data", "=" "%s"),
   ...    {"data": "goodbye"}, ("hello",), returning="self")
+
+
+Delete
+------
+
+With delete, you do not need to specify what will be changed. So the
+api of delete is like update but without changing columns::
+
+  >>> example_projection.delete(Where("data", "=" "%s"),("hello",))
+
+Like for `update` and `insert` you can use `returning` on delete::
+
+  >>> example_projection.delete(Where("data", "=" "%s"),("hello",),
+  ...    returning="self")
