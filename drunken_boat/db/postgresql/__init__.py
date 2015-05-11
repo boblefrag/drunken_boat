@@ -5,6 +5,14 @@ from drunken_boat.db.exceptions import (ConnectionError, CreateError,
                                         DropError)
 
 
+def field_is_nullable(field):
+    """
+    Parse a field dictionnary and check if a nullable value is
+    acceptable by the database
+    """
+    return field["is_nullable"] != "NO" or field["column_default"] is not None
+
+
 class DB(DatabaseWrapper):
 
     def __init__(self, **conn_params):
