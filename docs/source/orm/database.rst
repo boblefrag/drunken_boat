@@ -27,6 +27,7 @@ this tutorial you can use this simple script to generate the table you
 will use in the next step::
 
   #projection.py
+  from drunken_boat.db.postgresql import DB
   from example_blog.config import DATABASE
 
   def create_tables():
@@ -82,6 +83,7 @@ And you can get your results as easily as::
 results are list of `DataBaseObject`. because DataBaseObject are
 objects, you can attach any method you want on it. For example::
 
+  from drunken_boat.db.postgresql import DB
   from config import DATABASE
   from drunken_boat.db.postgresql.fields import Timestamp
   from drunken_boat.db.postgresql.projections import (Projection,
