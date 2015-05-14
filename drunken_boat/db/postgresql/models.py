@@ -75,7 +75,7 @@ class Projections(object):
         for projection_name, projection in projections.items():
             setattr(self, projection_name, projection(database))
         if not hasattr(self, "default"):
-            self.default = projections[projections.keys()[0]](database)
+            self.default = projections[list(projections.keys())[0]](database)
 
 
 class Model(object):
