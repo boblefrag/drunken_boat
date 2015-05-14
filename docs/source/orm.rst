@@ -4,6 +4,7 @@ ORM
 .. toctree::
    :maxdepth: 2
 
+   orm/models
    orm/database
    orm/relation
 
@@ -64,5 +65,6 @@ Because database can manage this in an admirable manner, and much
 more, we decide to create a schemaless ORM without breaking the Object
 Oriented paradigm. Seems interesting? Let's take the ride!
 
+.. include:: orm/models.rst
 .. include:: orm/database.rst
 .. include:: orm/relation.rst

@@ -13,10 +13,14 @@ Drunken Boat
 
 
 Drunken boat is a performance based webframework under heavy active
-developpment.
+developpment. It support python2.x and python3.x
 
 It offer Routing, View management and a projection based ORM, schema
-less and eventualy agnostic
+less and eventualy agnostic.
+
+The ORM is inspired by the POMM project: http://www.pomm-project.org/
+by Grégoire HUBERT (https://github.com/chanmix51/Pomm) Many thanks for
+his thoughts
 
 
 A simple Hello World
@@ -92,5 +96,7 @@ content of `view.py`::
 Every request on "/" will return a "Hello World!" a lot more can be
 done in `View` check the documentation on how to manage much more with
 `MiddleWare`,  `Projection` for database access and else.
+
+Continue reading :doc:`orm/models`
 
 See http://drunken_boat.readthedocs.org/ for full documentation
