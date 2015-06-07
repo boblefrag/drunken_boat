@@ -92,7 +92,7 @@ class ProjectionQuery(object):
     @property
     def database_object(self):
         if not hasattr(self, "Meta") or not hasattr(
-                    self.Meta, "database_object"):
+                self.Meta, "database_object"):
             database_object = DataBaseObject
         else:
             database_object = self.Meta.database_object
